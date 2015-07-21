@@ -125,9 +125,9 @@ if (EXISTS "${CMAKE_SOURCE_DIR}/.git")
 		OUTPUT_VARIABLE PACKAGE_VERSION
 		OUTPUT_STRIP_TRAILING_WHITESPACE
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-    if (PACKAGE_VERSION STREQUAL "")
-        message (FATAL_ERROR "Failed to retrive git version.")
-    endif()
+#    if (PACKAGE_VERSION STREQUAL "")
+#        message (FATAL_ERROR "Failed to retrive git version.")
+#    endif()
 endif()
 
 set (VERSION_FILE "${CMAKE_SOURCE_DIR}/VERSION")
