@@ -1,0 +1,3 @@
+version=3
+	https://github.com/bee/bee/tags \
+		.*/tarball/(\d+(?:\.\d+)+)

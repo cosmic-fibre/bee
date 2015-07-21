@@ -1,0 +1,3 @@
+/etc/bee/instances.available
+/etc/bee/instances.enabled
+/usr/lib/bee

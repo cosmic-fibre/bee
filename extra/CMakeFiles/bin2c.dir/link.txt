@@ -1,0 +1,1 @@
+/usr/bin/cc   -fno-omit-frame-pointer -fno-stack-protector -fexceptions -funwind-tables -fopenmp -msse2 -g -ggdb -O0    CMakeFiles/bin2c.dir/bin2c.c.o  -o bin2c -rdynamic 

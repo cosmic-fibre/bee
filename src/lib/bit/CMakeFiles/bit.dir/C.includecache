@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/wahyu/bee165b/src/lib/bit/bit.c
+bit/bit.h
+/home/wahyu/bee165b/src/lib/bit/bit/bit.h
+
+src/lib/bit/bit.h
+trivia/config.h
+src/lib/bit/trivia/config.h
+stddef.h
+-
+stdint.h
+-
+stdbool.h
+-
+string.h
+-
+strings.h
+-
+limits.h
+-
+
+src/trivia/config.h
+

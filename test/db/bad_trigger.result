@@ -1,0 +1,19 @@
+
+ #
+ # if on_connect() trigger raises an exception, the connection is dropped
+ #
+ 
+function f1() nosuchfunction() end
+---
+...
+db.session.on_connect(f1)
+---
+...
+greeting:  True
+fixheader:  True
+error code 32
+error message:  [string "function f1() nosuchfunction() end"]:1: attempt to call global 'nosuchfunction' (a nil value)
+eof: True
+db.session.on_connect(nil, f1)
+---
+...

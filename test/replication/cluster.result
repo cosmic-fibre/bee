@@ -1,0 +1,174 @@
+ok - cluster uuid
+-------------------------------------------------------------
+ gh-696: Check global READ permissions for replication
+-------------------------------------------------------------
+ok - join without read permissions to universe
+ok - subscribe without read permissions to universe
+db.schema.user.grant('guest', 'read', 'universe')
+---
+...
+ok - join without write permissions to _cluster
+db.schema.user.grant('guest', 'write', 'space', '_cluster')
+---
+...
+ok - join with granted permissions
+db.schema.user.revoke('guest', 'read', 'universe')
+---
+...
+db.schema.user.revoke('guest', 'write', 'space', '_cluster')
+---
+...
+db.schema.user.grant('guest', 'replication')
+---
+...
+ok - join with granted role
+-------------------------------------------------------------
+gh-707: Master crashes on JOIN if it does not have snapshot files
+gh-480: If socket is closed while JOIN, replica wont reconnect
+-------------------------------------------------------------
+ok - join without snapshots
+ok - _cluster does not changed after unsuccessful JOIN
+db.schema.user.revoke('guest', 'replication')
+---
+...
+db.snapshot()
+---
+- ok
+...
+-------------------------------------------------------------
+gh-434: Assertion if replace _cluster tuple
+-------------------------------------------------------------
+db.space._cluster:replace{1, '8c7ff474-65f9-4abe-81a4-a3e1019bb1ae'}
+---
+- [1, '8c7ff474-65f9-4abe-81a4-a3e1019bb1ae']
+...
+db.info.server.uuid
+---
+- 8c7ff474-65f9-4abe-81a4-a3e1019bb1ae
+...
+check log line for 'server UUID changed to 8c7ff474-65f9-4abe-81a4-a3e1019bb1ae'
+
+'server UUID changed to 8c7ff474-65f9-4abe-81a4-a3e1019bb1ae' exists in server log
+
+db.info.server.uuid
+---
+- 8c7ff474-65f9-4abe-81a4-a3e1019bb1ae
+...
+db.snapshot()
+---
+- ok
+...
+db.info.server.uuid
+---
+- 8c7ff474-65f9-4abe-81a4-a3e1019bb1ae
+...
+db.space._cluster:replace{1, require('uuid').NULL:str()}
+---
+- error: 'Invalid UUID: 00000000-0000-0000-0000-000000000000'
+...
+-------------------------------------------------------------
+gh-527: update vclock on delete from db.space._cluster
+-------------------------------------------------------------
+db.schema.user.grant('guest', 'replication')
+---
+...
+db.space._schema:insert{"test", 48}
+---
+- ['test', 48]
+...
+db.info.server.id
+---
+- 2
+...
+db.info.server.ro
+---
+- false
+...
+db.info.server.lsn
+---
+- 1
+...
+db.info.vclock[2]
+---
+- 1
+...
+db.space._cluster:delete{2}
+---
+- [2, '<replica uuid>']
+...
+db.info.server.id
+---
+- 0
+...
+db.info.server.ro
+---
+- true
+...
+db.info.server.lsn
+---
+- -1
+...
+db.info.vclock[2]
+---
+- null
+...
+db.space._schema:replace{"test", 48}
+---
+- error: Can't modify data because this server in read-only mode.
+...
+db.space._cluster:insert{10, "<replica uuid>"}
+---
+- [10, '<replica uuid>']
+...
+db.info.server.id
+---
+- 10
+...
+db.info.server.ro
+---
+- false
+...
+db.info.server.lsn
+---
+- 0
+...
+db.info.vclock[2]
+---
+- null
+...
+db.info.vclock[10]
+---
+- 0
+...
+db.space._cluster:update(10, {{'=', 1, 11}})
+---
+- error: Attempt to modify a tuple field which is part of index 'primary' in space
+    '_cluster'
+...
+db.info.server.id
+---
+- 10
+...
+db.info.server.ro
+---
+- false
+...
+db.info.server.lsn
+---
+- 0
+...
+db.info.vclock[2]
+---
+- null
+...
+db.info.vclock[10]
+---
+- 0
+...
+db.info.vclock[11]
+---
+- null
+...
+db.schema.user.revoke('guest', 'replication')
+---
+...

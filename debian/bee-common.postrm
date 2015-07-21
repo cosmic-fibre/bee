@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+    purge)
+        rm -fr  \
+            /var/log/bee \
+            /var/run/bee \
+            /var/lib/bee
+    ;;
+esac
+
+#DEBHELPER#
+

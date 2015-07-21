@@ -1,0 +1,15 @@
+
+# sham component makefile
+#
+
+all: banner $(OBJECTS)
+banner:
+	$(E) "SHAM v$(SHAM_VMAJOR).$(SHAM_VMINOR)"
+	$(E) "cc: $(CC)"
+	$(E) "cflags: $(CFLAGS_OPT) $(CFLAGS_STRICT)"
+	$(E)
+.c.o:
+	$(E) "cc   $<"
+	$(Q) $(CC) $(CFLAGS_SHAM) -c $< -o $@
+
+# vim: syntax=make

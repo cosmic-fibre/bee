@@ -1,0 +1,8 @@
+.xlog.inprogress exists
+_ = db.schema.space.create('test')
+---
+- error: Failed to write to disk
+...
+_ = db.schema.space.create('test')
+---
+...

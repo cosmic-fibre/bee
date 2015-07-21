@@ -1,0 +1,40 @@
+
+space = db.schema.space.create('test', { engine = 'sham' })
+index = space:create_index('primary', { type = 'tree', parts = {1, 'num'} })
+
+-- begin/rollback
+
+db.begin()
+for key = 1, 10 do space:insert({key}) end
+t = {}
+for key = 1, 10 do table.insert(t, space:select({key})[1]) end
+t
+db.rollback()
+
+t = {}
+for key = 1, 10 do assert(#space:select({key}) == 0) end
+t
+
+-- begin/commit insert
+
+db.begin()
+t = {}
+for key = 1, 10 do space:insert({key}) end
+t = {}
+db.commit()
+t = {}
+for key = 1, 10 do table.insert(t, space:select({key})[1]) end
+t
+
+-- begin/commit delete
+
+db.begin()
+for key = 1, 10 do space:delete({key}) end
+db.commit()
+
+t = {}
+for key = 1, 10 do assert(#space:select({key}) == 0) end
+t
+
+space:drop()
+--

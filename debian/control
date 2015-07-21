@@ -1,0 +1,99 @@
+Source: bee
+Priority: optional
+Maintainer: Dmitry E. Oboukhov <unera@debian.org>
+Build-Depends: cdbs, debhelper (>= 8),
+ cmake,
+ libreadline-dev,
+ libncurses5-dev,
+ libiberty-dev | binutils-dev,
+ libbfd-dev | binutils-dev
+Section: database
+Standards-Version: 3.9.6
+Homepage: http://bee.org/
+VCS-Browser: https://github.com/bee/bee
+VCS-Git: git://github.com/bee/bee.git
+
+Package: bee-common
+Architecture: i386 amd64 kfreebsd-i386 kfreebsd-amd64 hurd-i386
+Priority: optional
+Conflicts: bee-common (<< 1.5.3),
+ bee-lts-common,
+ bee-lts,
+ bee-lts-modules,
+ bee-lts-postgresql-module,
+ bee-lts-mysql-module,
+ bee-lts-dev,
+ bee-dbg (<< 1.5.2),
+ bee-common (<< 1.6~),
+ bee-client (<< 1.6~),
+ bee-client-dbg (<< 1.6~),
+ bee-plugins (<< 1.6~),
+ bee-mysql-plugin (<< 1.6~),
+ bee-postgresql-plugin (<< 1.6~),
+ libbee-dev (<< 1.6~)
+Replaces: bee-common (<< 1.5.3), bee-lts-common
+Depends: ${misc:Depends}, adduser, lsb-base
+Description: Bee in-memory database - common files
+ Bee is an in-memory database and Lua application server.
+ This package provides scripts to work with bee configuration
+ and log files.
+
+Package: bee
+Architecture: i386 amd64 kfreebsd-i386 kfreebsd-amd64 hurd-i386
+Priority: optional
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Replaces: bee-lts
+Conflicts: bee-lts-common,
+ bee-lts,
+ bee-lts-modules,
+ bee-lts-postgresql-module,
+ bee-lts-mysql-module,
+ bee-lts-dev,
+ bee-dbg (<< 1.5.2),
+ bee-common (<< 1.6~),
+ bee-client (<< 1.6~),
+ bee-client-dbg (<< 1.6~),
+ bee-plugins (<< 1.6~),
+ bee-mysql-plugin (<< 1.6~),
+ bee-postgresql-plugin (<< 1.6~),
+ libbee-dev (<< 1.6~)
+Recommends: bee-common (>= 1.6),
+ bee-modules
+Description: In-memory database with Lua application server
+ Bee is an in-memory database and Lua application server.
+ Its key properties include:
+ .
+  * flexible data model
+  * multiple index types: HASH, TREE, BITSET
+  * optional persistence and strong data durability
+  * log streaming replication
+  * Lua functions, procedures, triggers, with rich access to database API,
+    JSON support, inter-procedure and network communication libraries
+  * a command line client supporting simple SQL and a native Lua console
+ .
+ This package provides Bee server.
+
+Package: bee-dev
+Architecture: i386 amd64 kfreebsd-i386 kfreebsd-amd64 hurd-i386
+Priority: optional
+Section: libdevel
+Replaces: bee-lts-dev
+Conflicts: bee-lts-common,
+ bee-lts,
+ bee-lts-modules,
+ bee-lts-postgresql-module,
+ bee-lts-mysql-module,
+ bee-lts-dev,
+ bee-dbg (<< 1.5.2),
+ bee-common (<< 1.6~),
+ bee-client (<< 1.6~),
+ bee-client-dbg (<< 1.6~),
+ bee-plugins (<< 1.6~),
+ bee-mysql-plugin (<< 1.6~),
+ bee-postgresql-plugin (<< 1.6~),
+ libbee-dev (<< 1.6~)
+Depends: ${shlibs:Depends}, ${misc:Depends},
+ bee (= ${binary:Version})
+Description: Bee in-memory database - development headers
+ Bee is an in-memory database and Lua application server.
+ This package provides server headers needed to build pluggable modules.

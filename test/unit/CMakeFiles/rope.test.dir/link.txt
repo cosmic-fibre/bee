@@ -1,0 +1,1 @@
+/usr/bin/cc   -fno-omit-frame-pointer -fno-stack-protector -fexceptions -funwind-tables -fopenmp -msse2 -std=c11 -Wall -Wextra -Wno-sign-compare -Wno-strict-aliasing -fno-gnu89-inline -Werror -Wno-unused-parameter -Wno-unused -g -ggdb -O0    CMakeFiles/rope.test.dir/rope.c.o CMakeFiles/rope.test.dir/__/__/src/lib/salad/rope.c.o  -o rope.test -rdynamic 

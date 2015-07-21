@@ -1,0 +1,514 @@
+#!/usr/bin/env bee
+
+--[[
+
+=head1 NAME
+
+beectl - an utility to control bee instances
+
+=head1 SYNOPSIS
+
+    vim /etc/bee/instances.enabled/my_instance.lua
+    beectl start my_instance
+    beectl stop  my_instance
+    beectl logrotate my_instance
+
+=head1 DESCRIPTION
+
+The script is read C</etc/sysconfig/bee> or C</etc/default/bee>.
+The file contains common default instances options:
+
+    $ cat /etc/default/bee
+
+
+    -- Options for Bee
+    default_cfg = {
+        -- will become pid_file .. instance .. '.pid'
+        pid_file    =   "/var/run/bee",
+
+        -- will become wal_dir/instance/
+        wal_dir     =   "/var/lib/bee",
+
+        -- snap_dir/instance/
+        snap_dir    =   "/var/lib/bee",
+
+        -- sham_dir/instance/
+        sham_dir  =   "/var/lib/bee/sham",
+
+        -- logger/instance .. '.log'
+        logger      =   "/var/log/bee",
+
+        username    =   "bee",
+    }
+
+    instance_dir = "/etc/bee/instances.enabled"
+
+
+The file defines C<instance_dir> where user can place his
+applications (instances).
+
+Each instance can be controlled by C<beectl>:
+
+=head2 Starting instance
+
+    beectl start instance_name
+
+=head2 Stopping instance
+
+    beectl stop instance_name
+
+=head2 Logrotate instance's log
+
+    beectl logrotate instance_name
+
+=head2 Enter instance admin console
+
+    beectl enter instance_name
+
+=head2 status
+
+    beectl status instance_name
+
+Check if instance is up.
+
+If pid file exists and control socket exists and control socket is alive
+returns code C<0>.
+
+Return code != 0 in other cases. Can complain in log (stderr) if pid file
+exists and socket doesn't, etc.
+
+
+=head2 separate instances control
+
+If You use SysV init, You can use symlink from
+C<beectl> to C</etc/init.d/instance_name[.lua]>.
+C<beectl> detects if it is started by symlink and uses
+instance_name as C<`basename $0 .lua`>.
+
+=head1 COPYRIGHT
+
+Copyright (C) 2010-2013 Bee AUTHORS:
+please see AUTHORS file.
+
+=cut
+
+]]
+
+local fio = require 'fio'
+local log = require 'log'
+local errno = require 'errno'
+local yaml = require 'yaml'
+local console = require 'console'
+local socket = require 'socket'
+local ffi = require 'ffi'
+local os = require 'os'
+local fiber = require 'fiber'
+
+ffi.cdef[[ int kill(int pid, int sig); ]]
+
+local available_commands = {
+    'start',
+    'stop',
+    'logrotate',
+    'status',
+    'enter',
+    'restart',
+    'reload'
+}
+
+--
+-- true if we're running in HOME directory of a user
+--
+local usermode
+--
+-- a file with system-wide settings
+--
+local default_file
+--
+-- instance name
+--
+local instance_name
+--
+--
+--
+local instance_path
+--
+-- console socket
+--
+local console_sock
+
+--
+-- print usage and exit
+--
+
+local function usage()
+    log.error("Usage: %s {%s} instance_name",
+        arg[0], table.concat(available_commands, '|'))
+    log.error("Config file: %s", default_file)
+    os.exit(1)
+end
+
+--
+-- shift argv to remove 'beectl' from arg[0]
+--
+local function shift_argv(arg, argno, argcount)
+    for i = argno, 128 do
+        arg[i] = arg[i + argcount]
+        if arg[i] == nil then
+            break
+        end
+    end
+end
+
+--
+-- Check if the requested action is among
+-- supported ones, and return it in this case
+-- Otherwise print help and exit.
+--
+local function check_cmd(cmd)
+    for _, vcmd in pairs(available_commands) do
+        if cmd == vcmd then
+            return cmd
+        end
+    end
+    usage()
+end
+
+--
+-- Find if we're running under a user, and this
+-- user has a default file in his home directory.
+-- If present, use it. Otherwise assume a system-
+-- wide default. If it's missing, it's OK as well.
+--
+local function find_default_file()
+    if os.getenv('HOME') then
+        local c = os.getenv('HOME') .. '/.config/bee/bee'
+        if fio.stat(c) then
+            usermode = true
+            return c
+        end
+    end
+    --
+    -- no user-level defaults, use a system-wide one
+    --
+    usermode = false
+    local config_list = {
+        '/etc/sysconfig/bee',
+        '/etc/default/bee',
+        '/usr/local/etc/bee/bee',
+    }
+    for _, c in pairs(config_list) do
+        if fio.stat(c) then
+            return c
+        end
+    end
+    -- It's OK if there is no default file -
+    --  load_default_file() will assume some defaults
+    return nil
+end
+
+--
+-- System-wide default file may be missing, this is OK,
+-- we'll assume built-in defaults
+--
+function load_default_file(default_file)
+    if default_file then
+        dofile(default_file)
+    end
+    if default_cfg == nil then
+        default_cfg = {}
+    end
+    local d = default_cfg
+
+    d.pid_file   = d.pid_file and d.pid_file or "/var/run/bee"
+    d.wal_dir    = d.wal_dir  and d.wal_dir or "/var/lib/bee"
+    d.snap_dir   = d.snap_dir and d.snap_dir or "/var/lib/bee"
+    d.logger     = d.logger   and d.logger or "/var/log/bee"
+    d.sham_dir = d.sham_dir and d.sham_dir or "/var/lib/bee"
+
+    d.pid_file   = fio.pathjoin(d.pid_file, instance_name .. '.pid')
+    d.wal_dir    = fio.pathjoin(d.wal_dir, instance_name)
+    d.snap_dir   = fio.pathjoin(d.snap_dir, instance_name)
+    d.sham_dir = fio.pathjoin(d.sham_dir, instance_name)
+    d.logger     = fio.pathjoin(d.logger, instance_name .. '.log')
+
+    if not usermode then
+        -- change user name only if not running locally
+        d.username = d.username and d.username or "bee"
+        --
+        -- instance_dir must be set in the defaults file,
+        -- but don't try to set it to the  global instance dir
+        -- if the user-local defaults file is in use
+        --
+        if not instance_dir then
+            instance_dir = '/etc/bee/instances.enabled'
+        end
+    end
+
+    if instance_dir == nil then
+        log.error('Instance directory (instance_dir) is not set in %s', default_file)
+        os.exit(-1)
+    end
+
+    if not fio.stat(instance_dir) then
+        log.error('Instance directory %s does not exist', instance_dir)
+        os.exit(-1)
+    end
+end
+
+--
+-- In case there is no explicit instance name,
+-- check whether arg[0] is a symlink. In that
+-- case, the name of the symlink is the instance
+-- name.
+--
+local function find_instance_name(arg0, arg2)
+    if arg2 ~= nil then
+        return fio.basename(arg2, '.lua')
+    end
+    local istat = fio.lstat(arg0)
+    if istat == nil then
+        log.error("Can't stat %s: %s", arg0, errno.strerror())
+        os.exit(1)
+    end
+    if not istat:is_link() then
+        usage()
+    end
+    return fio.basename(arg0, '.lua')
+end
+
+
+local function mkdir(dirname)
+    log.info("mkdir %s", dirname)
+    if not fio.mkdir(dirname, tonumber('0755', 8)) then
+        log.error("Can't mkdir %s: %s", dirname, errno.strerror())
+        os.exit(-1)
+    end
+
+    if not usermode and not fio.chown(dirname, default_cfg.username, default_cfg.username) then
+        log.error("Can't chown(%s, %s, %s): %s",
+            default_cfg.username, default_cfg.username, dirname, errno.strerror())
+    end
+end
+
+function mk_default_dirs(cfg)
+    -- create pid_dir
+    pid_dir = fio.dirname(cfg.pid_file)
+    if fio.stat(pid_dir) == nil then
+        mkdir(pid_dir)
+    end
+    -- create wal_dir
+    if fio.stat(cfg.wal_dir) == nil then
+        mkdir(cfg.wal_dir)
+    end
+    -- create snap_dir
+    if fio.stat(cfg.snap_dir) == nil then
+        mkdir(cfg.snap_dir)
+    end
+    -- create sham_dir
+    if fio.stat(cfg.sham_dir) == nil then
+        mkdir(cfg.sham_dir)
+    end
+    -- create log_dir
+    log_dir = fio.dirname(cfg.logger)
+    if log_dir:find('|') == nil and fio.stat(log_dir) == nil then
+        mkdir(log_dir)
+    end
+end
+
+local orig_cfg = db.cfg
+
+local function wrapper_cfg(cfg)
+    for i, v in pairs(default_cfg) do
+        if cfg[i] == nil then
+            cfg[i] = v
+        end
+    end
+    --
+    -- force these startup options
+    --
+    cfg.pid_file = default_cfg.pid_file
+    cfg.username = default_cfg.username
+    cfg.background = true
+    cfg.custom_proc_title = instance_name
+
+    mk_default_dirs(cfg)
+    local res = orig_cfg(cfg)
+
+    require('fiber').name(instance_name)
+    log.info('Run console at %s', console_sock)
+    console.listen(console_sock)
+
+    return res
+end
+
+function stop()
+    log.info("Stopping instance...")
+    local pid_file = default_cfg.pid_file
+    if fio.stat(pid_file) == nil then
+        log.error("Process is not running (pid: %s)", pid_file)
+        return 0
+    end
+
+    local f = fio.open(pid_file, 'O_RDONLY')
+    if f == nil then
+        log.error("Can't read pid file %s: %s", pid_file, errno.strerror())
+        return -1
+    end
+
+    local str = f:read(64)
+    f:close()
+
+    local pid = tonumber(str)
+
+    if pid == nil or pid <= 0 then
+        log.error("Broken pid file %s", pid_file)
+        fio.unlink(pid_file)
+        return -1
+    end
+
+    if ffi.C.kill(pid, 15) < 0 then
+        log.error("Can't kill process %d: %s", pid, errno.strerror())
+        fio.unlink(pid_file)
+        return -1
+    end
+    return 0
+end
+
+function start()
+    log.info("Starting instance...")
+    db.cfg = wrapper_cfg
+    local success, data = pcall(dofile, instance_path)
+    -- if load fails - show last 10 lines of the log file
+    if not success then
+        print('Start failed: ' .. data)
+        if fio.stat(default_cfg.logger) then
+            os.execute('tail -n 10 ' .. default_cfg.logger)
+        end
+    end
+end
+
+default_file = find_default_file()
+
+instance_name = find_instance_name(arg[0], arg[2])
+
+local cmd = check_cmd(arg[1])
+
+load_default_file(default_file)
+
+--
+-- Pass the rest of command line arguments to the
+-- instsance
+--
+shift_argv(arg, 0, 2)
+
+instance_path = fio.pathjoin(instance_dir, instance_name .. '.lua')
+
+if not fio.stat(instance_path) then
+    log.error('Instance %s is not found in %s', instance_name, instance_dir)
+    os.exit(-1)
+end
+
+log.info('Found %s.lua in %s', instance_name, instance_dir)
+
+-- create  a path to the control socket (admin console)
+console_sock = fio.pathjoin(fio.dirname(default_cfg.pid_file),
+                            instance_name .. '.control')
+
+if cmd == 'start' then
+    start()
+
+elseif cmd == 'stop' then
+    os.exit(stop())
+
+elseif cmd == 'restart' then
+    stop()
+    fiber.sleep(1)
+    start()
+
+elseif cmd == 'logrotate' then
+    if fio.stat(console_sock) == nil then
+        -- process is not running, do nothing
+        os.exit(0)
+    end
+
+    local s = socket.tcp_connect('unix/', console_sock)
+    if s == nil then
+        -- socket is not opened, do nothing
+        os.exit(0)
+    end
+
+    s:write[[
+        require('log'):rotate()
+        require('log').info("Rotate log file")
+    ]]
+
+    s:read({ '[.][.][.]' }, 2)
+
+    os.exit(0)
+
+elseif cmd == 'enter' then
+    if fio.stat(console_sock) == nil then
+        log.error("Can't connect to %s (socket not found)", console_sock)
+        os.exit(-1)
+    end
+
+    log.info('Connecting to %s', console_sock)
+
+    local cmd = string.format(
+        "require('console').connect('%s')", console_sock)
+
+    console.on_start( function(self) self:eval(cmd) end )
+    console.on_client_disconnect( function(self) self.running = false end )
+    console.start()
+    os.exit(0)
+elseif cmd == 'status' then
+    local pid_file = default_cfg.pid_file
+    if fio.stat(pid_file) == nil then
+        if errno() == errno.ENOENT then
+            print(instance_name .. ' is stopped (pid file does not exist)')
+            os.exit(1)
+        end
+        log.error("Cant access pidfile %s: %s", pid_file, errno.strerror())
+    end
+
+    if fio.stat(console_sock) == nil then
+        if errno() == errno.ENOENT then
+            log.warn("pid file exists, but the control socket (%s) doesn't",
+                console_sock)
+            os.exit(2)
+        end
+    end
+
+    local s = socket.tcp_connect('unix/', console_sock)
+    if s == nil then
+        if errno() ~= errno.EACCES then
+            log.warn("Can't access control socket %s: %s", console_sock,
+                errno.strerror())
+            os.exit(3)
+        else
+            os.exit(0)
+        end
+    end
+
+    s:close()
+    print(instance_name .. ' is running (pid:' .. default_cfg.pid_file .. ')')
+    os.exit(0)
+elseif cmd == 'reload' then
+    if arg[1] == nil then
+        log.error("Usage: beectl reload instance_name file.lua")
+        os.exit(1)
+    end
+    if fio.stat(arg[1]) == nil then
+        if errno() == errno.ENOENT then
+            print(arg[1] .. ': file not found')
+            os.exit(1)
+        end
+    end
+    dofile(arg[1])
+else
+    log.error("Unknown command '%s'", cmd)
+    os.exit(-1)
+end
+
+-- vim: syntax=lua

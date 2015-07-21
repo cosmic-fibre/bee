@@ -1,0 +1,66 @@
+-- Test Lua from admin console. Whenever producing output,
+-- make sure it's a valid YAML
+db.info.unknown_variable
+---
+- null
+...
+db.info[23]
+---
+- null
+...
+db.info['unknown_variable']
+---
+- null
+...
+string.match(db.info.version, '^[1-9]') ~= nil
+---
+- true
+...
+string.match(db.info.pid, '^[1-9][0-9]*$') ~= nil
+---
+- true
+...
+#db.info.server > 0
+---
+- false
+...
+db.info.replication.status
+---
+- off
+...
+db.info.status
+---
+- running
+...
+string.len(db.info.uptime) > 0
+---
+- true
+...
+string.match(db.info.uptime, '^[1-9][0-9]*$') ~= nil
+---
+- true
+...
+t = {}
+---
+...
+for k, _ in pairs(db.info()) do table.insert(t, k) end
+---
+...
+table.sort(t)
+---
+...
+t
+---
+- - pid
+  - replication
+  - server
+  - snapshot_pid
+  - status
+  - uptime
+  - vclock
+  - version
+...
+db.info.snapshot_pid
+---
+- 0
+...

@@ -1,0 +1,14 @@
+-- db.info().sham['sham.version']
+space = db.schema.space.create('test', { engine = 'sham' })
+---
+...
+index = space:create_index('primary', { type = 'tree', parts = {1, 'num'} })
+---
+...
+for key = 1, 10 do space:insert({key}) end
+---
+...
+-- db.info().sham['db.100.index.count']
+space:drop()
+---
+...

@@ -1,0 +1,2 @@
+/usr/bin/ar cr libcore.a  CMakeFiles/core.dir/say.cc.o CMakeFiles/core.dir/memory.cc.o CMakeFiles/core.dir/fiber.cc.o CMakeFiles/core.dir/exception.cc.o CMakeFiles/core.dir/coro.cc.o CMakeFiles/core.dir/object.cc.o CMakeFiles/core.dir/assoc.c.o
+/usr/bin/ranlib libcore.a

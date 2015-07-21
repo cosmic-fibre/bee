@@ -1,0 +1,2 @@
+/usr/bin/ar cr libbitset.a  CMakeFiles/bitset.dir/bitset.c.o CMakeFiles/bitset.dir/page.c.o CMakeFiles/bitset.dir/expr.c.o CMakeFiles/bitset.dir/iterator.c.o CMakeFiles/bitset.dir/index.c.o
+/usr/bin/ranlib libbitset.a

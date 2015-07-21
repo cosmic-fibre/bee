@@ -1,0 +1,1 @@
+/usr/bin/cc   -fno-omit-frame-pointer -fno-stack-protector -fexceptions -funwind-tables -fopenmp -msse2 -std=c11 -Wall -Wextra -Wno-sign-compare -Wno-strict-aliasing -fno-gnu89-inline -Werror -Wno-unused-parameter -Wno-unused -g -ggdb -O0    CMakeFiles/bit.test.dir/bit.c.o  -o bit.test -rdynamic ../../src/lib/bit/libbit.a 

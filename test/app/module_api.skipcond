@@ -1,0 +1,5 @@
+import os
+
+# skip test if we are testing bee from package
+if os.path.exists('/usr/bin/bee'):
+    self.skip=1

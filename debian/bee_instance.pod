@@ -1,0 +1,34 @@
+=head1 NAME
+
+bee_instance - utility to start/stop bee instances
+
+
+=head1 SINOPSYS
+
+    bee_instance NAME start
+    bee_instance NAME stop
+
+
+=head1 DESCRIPTION
+
+The utility seeks instance in B</etc/bee/instances.enabled/> directory.
+It seeks I<< /etc/bee/instances.enabled/B<NAME>.cfg >>, but You can use
+filepath instead B<NAME>.
+
+The utility extends bee's configs by the following variables:
+
+=over
+
+=item file_descriptors = COUNT
+
+You can set sockets limit for the instance.
+
+=back
+
+The utility copies instance's config to directory
+B</var/lib/bee/started/>, exclude additional variables,
+then starts or stops instance.
+
+In the first starting the utilitie creates
+I<< /var/lib/bee/snapshot/B<NAME> >> directory and empty snapshot
+inside the directory.

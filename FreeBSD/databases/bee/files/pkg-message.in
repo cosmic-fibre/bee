@@ -1,0 +1,13 @@
+#########################################################
+#
+#
+#        After install you'll need:
+#
+#    Edit example config:
+#    %%ETCDIR%%/bee.cfg.sample
+#    Init storage:
+#    %%PREFIX%%/bin/bee_db --init-storage \
+#      -c %%ETCDIR%%/bee.cfg
+#
+#
+#########################################################

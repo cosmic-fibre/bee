@@ -1,0 +1,201 @@
+function f() db.schema.space.create('test', { id = 0 }) end
+---
+...
+db.schema.user.create('test', { password = 'test' })
+---
+...
+db.schema.func.create('f')
+---
+...
+db.schema.user.grant('test', 'Write', 'space', '_space')
+---
+...
+db.schema.user.grant('test', 'Execute', 'function', 'f')
+---
+...
+call f()
+---
+...
+index = db.space.test:create_index('primary', { type = 'hash' })
+---
+...
+db.schema.func.drop('f')
+---
+...
+ping
+---
+- ok
+...
+select * from t0
+---
+- error:
+    errcode: ER_KEY_FIELD_TYPE
+    errmsg: Supplied key type of part 0 does not match index part type: expected NUM
+...
+insert into t0 values (1, 'I am a tuple')
+---
+- [1, 'I am a tuple']
+...
+select * from t0 where k0 = 1
+---
+- [1, 'I am a tuple']
+...
+select * from t0 where k0 = 0
+---
+...
+select * from t0 where k0 = 2
+---
+...
+select * from t0 where k0 = 1
+---
+- [1, 'I am a tuple']
+...
+db.snapshot()
+---
+- ok
+...
+select * from t0 where k0 = 1
+---
+- [1, 'I am a tuple']
+...
+select * from t0 where k0 = 1
+---
+- [1, 'I am a tuple']
+...
+delete from t0 where k0 = 1
+---
+- [1, 'I am a tuple']
+...
+select * from t0 where k0 = 1
+---
+...
+update t0 set k1 = 'I am a new tuple' where k0=1
+---
+...
+select * from t0 where k0=1
+---
+...
+insert into t0 values (1, 'I am a new tuple')
+---
+- [1, 'I am a new tuple']
+...
+select * from t0 where k0 = 1
+---
+- [1, 'I am a new tuple']
+...
+update t0 set k1 = 'I am the newest tuple' where k0=1
+---
+- [1, 'I am the newest tuple']
+...
+select * from t0 where k0 = 1
+---
+- [1, 'I am the newest tuple']
+...
+update t0 set k1 = 'Huh', k2 = 'I am a new field! I was added via append' where k0=1
+---
+- [1, 'Huh', 'I am a new field! I was added via append']
+...
+select * from t0 where k0 = 1
+---
+- [1, 'Huh', 'I am a new field! I was added via append']
+...
+update t0 set k1 = 'Huh', k1000 = 'invalid field' where k0=1
+---
+- error:
+    errcode: ER_NO_SUCH_FIELD
+    errmsg: Field 1000 was not found in the tuple
+...
+select * from t0 where k0 = 1
+---
+- [1, 'Huh', 'I am a new field! I was added via append']
+...
+replace into t0 values (1, 'I am a new tuple', 'stub')
+---
+- [1, 'I am a new tuple', 'stub']
+...
+update t0 set k1 = 'Huh', k2 = 'Oh-ho-ho' where k0=1
+---
+- [1, 'Huh', 'Oh-ho-ho']
+...
+select * from t0 where k0 = 1
+---
+- [1, 'Huh', 'Oh-ho-ho']
+...
+update t0 set k1 = '', k2 = '' where k0=1
+---
+- [1, '', '']
+...
+select * from t0 where k0 = 1
+---
+- [1, '', '']
+...
+update t0 set k1 = 2, k2 = 3 where k0=1
+---
+- [1, 2, 3]
+...
+select * from t0 where k0 = 1
+---
+- [1, 2, 3]
+...
+insert into t0 values (0)
+---
+- [0]
+...
+select * from t0 where k0=0
+---
+- [0]
+...
+insert into t0 values (4294967295)
+---
+- [4294967295]
+...
+select * from t0 where k0=4294967295
+---
+- [4294967295]
+...
+delete from t0 where k0=0
+---
+- [0]
+...
+delete from t0 where k0=4294967295
+---
+- [4294967295]
+...
+#
+# A test case for: http://bugs.launchpad.net/bugs/712456
+# Verify that when trying to access a non-existing or
+# very large space id, no crash occurs.
+#
+
+select * from t1 where k0 = 0
+---
+- error:
+    errcode: ER_NO_SUCH_SPACE
+    errmsg: Space '1' does not exist
+...
+select * from t65537 where k0 = 0
+---
+- error:
+    errcode: ER_NO_SUCH_SPACE
+    errmsg: Space '65537' does not exist
+...
+select * from t4294967295 where k0 = 0
+---
+- error:
+    errcode: ER_NO_SUCH_SPACE
+    errmsg: Space '4294967295' does not exist
+...
+db.space[0]:drop()
+---
+...
+db.schema.user.drop('test')
+---
+...
+#
+# A test case for: http://bugs.launchpad.net/bugs/716683
+# Admin console should not stall on unknown command.
+
+show status
+---
+- error: '[string "show status"]:1: ''='' expected near ''status'''
+...

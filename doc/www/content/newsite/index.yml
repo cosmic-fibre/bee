@@ -1,0 +1,96 @@
+---
+title   : "Bee - A NoSQL database running in a Lua application server"
+slug    : "index"
+save_as : "index.html"
+template: "index"
+blocks  :
+  header:
+    - "Bee"
+    - "A NoSQL database running in a Lua application server"
+    - >
+      Bee combines the network programming power of Node.JS
+      with data persitence capabilities of Redis.
+  features:
+    - format: rst
+      content: >
+        .. |br| raw:: html
+
+            <br />
+
+        A drop-in replacement for Lua 5.1, based on
+        LuaJIT 2.0; |br| simply use ``#!/usr/bin/bee``
+        instead of ``#!/usr/bin/lua`` in your script
+    - "Lua packages for non-blocking I/O, fibers and HTTP"
+    - format: rst
+      content: >
+        `MessagePack <http://msgpack.org/>`_ data format and
+        MessagePack based client-server protocol
+    - format: rst
+      content: >
+        two data engines: 100% in-memory with optional persistence
+        and a `2-level disk-based B-tree <http://sphia.org>`_,
+        to use with large data sets
+    - "secondary key and index iterators support"
+    - "asynchronous master-master replication"
+    - "authentication and access control"
+  news:
+    -
+      - "Bee 1.6.5 is released"
+      - "https://groups.google.com/d/msg/bee/zIM68T93Be0/nqwe6If74PwJ"
+      - "22.04"
+      - "2015"
+    -
+      - "Bee Meetup in Avito"
+      - "http://www.meetup.com/Bee/events/220924229/"
+      - "04.03"
+      - "2015"
+    -
+      - "Bee 1.6.4 is released"
+      - "https://groups.google.com/forum/#!topic/bee/F3qc_zemEYg"
+      - "24.11"
+      - "2014"
+  support:
+    - format: rst
+      content: >
+          We are happy to provide help on
+          `bee@groups.google.com <https://groups.google.com/forum/#!forum/bee>`_.
+    - format: rst
+      content: >
+        If you need immediate help, try to ping maintainers on
+        `\#bee <http://webchat.freenode.net/?channels=bee>`_
+        channel at `irc.freenode.net <irc://irc.freenode.net>`_.
+    - format: rst
+      content: >
+        Terms of commercial 24x7 support are available upon request,
+        please send an inquiry to support@bee.org
+  example:
+    format: rst
+    content: |
+      .. code-block:: lua
+          :linenos: none
+
+          #!/usr/bin/env bee
+
+          db.cfg{}
+          hosts = db.space.hosts
+          if not hosts then
+              hosts = db.schema.create_space('hosts')
+              hosts:create_index('primary',
+                      {parts = {1, 'STR'}})
+          end
+
+          local function handler(self)
+              local host = self.peer.host
+              local response = {
+                  host = host;
+                  counter = hosts:inc(host);
+              }
+              return self:render{ json = response }
+          end
+
+          httpd = require('http.server')
+          server = httpd.new('127.0.0.1', 8080)
+          server:route({ path = '/' }, handler)
+          server:start()
+  video: '<iframe src="//www.youtube.com/embed/bM0zK0lwEz8" frameborder="0" allowfullscreen></iframe>'
+...

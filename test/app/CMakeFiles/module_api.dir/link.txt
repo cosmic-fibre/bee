@@ -1,0 +1,1 @@
+/usr/bin/cc  -fPIC  -fno-omit-frame-pointer -fno-stack-protector -fexceptions -funwind-tables -fopenmp -msse2 -std=c11 -Wall -Wextra -Wno-sign-compare -Wno-strict-aliasing -fno-gnu89-inline -Werror -Wno-unused-parameter -g -ggdb -O0   -shared -Wl,-soname,module_api.so -o module_api.so CMakeFiles/module_api.dir/module_api.c.o 

@@ -1,0 +1,401 @@
+errinj = db.error.injection
+---
+...
+space = db.schema.space.create('tweedledum')
+---
+...
+index = space:create_index('primary', { type = 'hash' })
+---
+...
+errinj.info()
+---
+- ERRINJ_WAL_IO:
+    state: false
+  ERRINJ_TESTING:
+    state: false
+  ERRINJ_INDEX_ALLOC:
+    state: false
+  ERRINJ_TUPLE_ALLOC:
+    state: false
+  ERRINJ_WAL_ROTATE:
+    state: false
+...
+errinj.set("some-injection", true)
+---
+- 'error: can''t find error injection ''some-injection'''
+...
+errinj.set("some-injection") -- check error
+---
+- 'error: can''t find error injection ''some-injection'''
+...
+space:select{222444}
+---
+- []
+...
+errinj.set("ERRINJ_TESTING", true)
+---
+- ok
+...
+space:select{222444}
+---
+- error: Error injection 'ERRINJ_TESTING'
+...
+errinj.set("ERRINJ_TESTING", false)
+---
+- ok
+...
+-- Check how well we handle a failed log write
+errinj.set("ERRINJ_WAL_IO", true)
+---
+- ok
+...
+space:insert{1}
+---
+- error: Failed to write to disk
+...
+space:get{1}
+---
+...
+errinj.set("ERRINJ_WAL_IO", false)
+---
+- ok
+...
+space:insert{1}
+---
+- [1]
+...
+errinj.set("ERRINJ_WAL_IO", true)
+---
+- ok
+...
+space:update(1, {{'=', 2, 2}})
+---
+- error: Failed to write to disk
+...
+space:get{1}
+---
+- [1]
+...
+space:get{2}
+---
+...
+errinj.set("ERRINJ_WAL_IO", false)
+---
+- ok
+...
+space:truncate()
+---
+...
+-- Check a failed log rotation
+errinj.set("ERRINJ_WAL_ROTATE", true)
+---
+- ok
+...
+space:insert{1}
+---
+- error: Failed to write to disk
+...
+space:get{1}
+---
+...
+errinj.set("ERRINJ_WAL_ROTATE", false)
+---
+- ok
+...
+space:insert{1}
+---
+- [1]
+...
+errinj.set("ERRINJ_WAL_ROTATE", true)
+---
+- ok
+...
+space:update(1, {{'=', 2, 2}})
+---
+- error: Failed to write to disk
+...
+space:get{1}
+---
+- [1]
+...
+space:get{2}
+---
+...
+errinj.set("ERRINJ_WAL_ROTATE", false)
+---
+- ok
+...
+space:update(1, {{'=', 2, 2}})
+---
+- [1, 2]
+...
+space:get{1}
+---
+- [1, 2]
+...
+space:get{2}
+---
+...
+errinj.set("ERRINJ_WAL_ROTATE", true)
+---
+- ok
+...
+space:truncate()
+---
+- error: Failed to write to disk
+...
+errinj.set("ERRINJ_WAL_ROTATE", false)
+---
+- ok
+...
+space:truncate()
+---
+...
+space:drop()
+---
+...
+-- Check how well we handle a failed log write in DDL
+s_disabled = db.schema.space.create('disabled')
+---
+...
+s_withindex = db.schema.space.create('withindex')
+---
+...
+index1 = s_withindex:create_index('primary', { type = 'hash' })
+---
+...
+s_withdata = db.schema.space.create('withdata')
+---
+...
+index2 = s_withdata:create_index('primary', { type = 'tree' })
+---
+...
+s_withdata:insert{1, 2, 3, 4, 5}
+---
+- [1, 2, 3, 4, 5]
+...
+s_withdata:insert{4, 5, 6, 7, 8}
+---
+- [4, 5, 6, 7, 8]
+...
+index3 = s_withdata:create_index('secondary', { type = 'hash', parts = {2, 'num', 3, 'num' }})
+---
+...
+errinj.set("ERRINJ_WAL_IO", true)
+---
+- ok
+...
+test = db.schema.space.create('test')
+---
+- error: Failed to write to disk
+...
+s_disabled:create_index('primary', { type = 'hash' })
+---
+- error: Failed to write to disk
+...
+s_disabled.enabled
+---
+- false
+...
+s_disabled:insert{0}
+---
+- error: 'No index #0 is defined in space ''disabled'''
+...
+s_withindex:create_index('secondary', { type = 'tree', parts = { 2, 'num'} })
+---
+- error: Failed to write to disk
+...
+s_withindex.index.secondary
+---
+- null
+...
+s_withdata.index.secondary:drop()
+---
+- error: Failed to write to disk
+...
+s_withdata.index.secondary.unique
+---
+- true
+...
+s_withdata:drop()
+---
+- error: Failed to write to disk
+...
+db.space['withdata'].enabled
+---
+- true
+...
+index4 = s_withdata:create_index('another', { type = 'tree', parts = { 5, 'num' }, unique = false})
+---
+- error: Failed to write to disk
+...
+s_withdata.index.another
+---
+- null
+...
+errinj.set("ERRINJ_WAL_IO", false)
+---
+- ok
+...
+test = db.schema.space.create('test')
+---
+...
+index5 = s_disabled:create_index('primary', { type = 'hash' })
+---
+...
+s_disabled.enabled
+---
+- true
+...
+s_disabled:insert{0}
+---
+- [0]
+...
+index6 = s_withindex:create_index('secondary', { type = 'tree', parts = { 2, 'num'} })
+---
+...
+s_withindex.index.secondary.unique
+---
+- true
+...
+s_withdata.index.secondary:drop()
+---
+...
+s_withdata.index.secondary
+---
+- null
+...
+s_withdata:drop()
+---
+...
+db.space['withdata']
+---
+- null
+...
+index7 = s_withdata:create_index('another', { type = 'tree', parts = { 5, 'num' }, unique = false})
+---
+- error: Space 'withdata' does not exist
+...
+s_withdata.index.another
+---
+- null
+...
+test:drop()
+---
+...
+s_disabled:drop()
+---
+...
+s_withindex:drop()
+---
+...
+-- Check transaction rollback when out of memory
+s = db.schema.space.create('s')
+---
+...
+_ = s:create_index('pk')
+---
+...
+errinj.set("ERRINJ_TUPLE_ALLOC", true)
+---
+- ok
+...
+s:auto_increment{}
+---
+- error: Error injection 'ERRINJ_TUPLE_ALLOC'
+...
+s:select{}
+---
+- []
+...
+s:auto_increment{}
+---
+- error: Error injection 'ERRINJ_TUPLE_ALLOC'
+...
+s:select{}
+---
+- []
+...
+s:auto_increment{}
+---
+- error: Error injection 'ERRINJ_TUPLE_ALLOC'
+...
+s:select{}
+---
+- []
+...
+--# setopt delimiter ';'
+db.begin()
+    s:insert{1}
+db.commit();
+---
+- error: Error injection 'ERRINJ_TUPLE_ALLOC'
+...
+s:select{};
+---
+- []
+...
+db.begin()
+    s:insert{1}
+    s:insert{2}
+db.commit();
+---
+- error: Error injection 'ERRINJ_TUPLE_ALLOC'
+...
+s:select{};
+---
+- []
+...
+db.begin()
+    pcall(s.insert, s, {1})
+    s:insert{2}
+db.commit();
+---
+- error: Error injection 'ERRINJ_TUPLE_ALLOC'
+...
+s:select{};
+---
+- []
+...
+errinj.set("ERRINJ_TUPLE_ALLOC", false);
+---
+- ok
+...
+db.begin()
+    s:insert{1}
+    errinj.set("ERRINJ_TUPLE_ALLOC", true)
+    s:insert{2}
+db.commit();
+---
+- error: Error injection 'ERRINJ_TUPLE_ALLOC'
+...
+s:select{};
+---
+- []
+...
+errinj.set("ERRINJ_TUPLE_ALLOC", false);
+---
+- ok
+...
+db.begin()
+    s:insert{1}
+    errinj.set("ERRINJ_TUPLE_ALLOC", true)
+    pcall(s.insert, s, {2})
+db.commit();
+---
+...
+s:select{};
+---
+- - [1]
+...
+--# setopt delimiter ''
+errinj.set("ERRINJ_TUPLE_ALLOC", false)
+---
+- ok
+...
+s:drop()
+---
+...
+errinj = nil
+---
+...

@@ -1,0 +1,8 @@
+--- This file is part of LuaDist project
+
+name = "lpeg"
+version = "0.12"
+
+depends = {
+	"lua >= 5.1"
+}

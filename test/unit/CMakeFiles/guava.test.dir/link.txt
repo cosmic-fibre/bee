@@ -1,0 +1,1 @@
+/usr/bin/cc   -fno-omit-frame-pointer -fno-stack-protector -fexceptions -funwind-tables -fopenmp -msse2 -std=c11 -Wall -Wextra -Wno-sign-compare -Wno-strict-aliasing -fno-gnu89-inline -Werror -Wno-unused-parameter -Wno-unused -g -ggdb -O0    CMakeFiles/guava.test.dir/guava.c.o  -o guava.test -rdynamic ../../src/lib/salad/libsalad.so -Wl,-rpath,/home/wahyu/bee165b/src/lib/salad 

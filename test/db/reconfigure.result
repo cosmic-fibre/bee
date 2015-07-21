@@ -1,0 +1,113 @@
+db.cfg.too_long_threshold
+---
+- 0.5
+...
+-- good
+db.cfg{too_long_threshold=0.2}
+---
+...
+db.cfg.too_long_threshold
+---
+- 0.2
+...
+-- good 
+db.cfg{snap_io_rate_limit=10}
+---
+...
+db.cfg.snap_io_rate_limit
+---
+- 10
+...
+db.cfg.io_collect_interval
+---
+- null
+...
+db.cfg{io_collect_interval=0.001}
+---
+...
+db.cfg.io_collect_interval
+---
+- 0.001
+...
+-- A test case for http://bugs.launchpad.net/bugs/712447:
+-- Valgrind reports use of not initialized memory after 'reload
+-- configuration'
+--
+space = db.schema.space.create('tweedledum')
+---
+...
+index = space:create_index('primary')
+---
+...
+space:insert{1, 'tuple'}
+---
+- [1, 'tuple']
+...
+db.snapshot()
+---
+- ok
+...
+db.cfg{}
+---
+...
+space:insert{2, 'tuple2'}
+---
+- [2, 'tuple2']
+...
+db.snapshot()
+---
+- ok
+...
+space:insert{3, 'tuple3'}
+---
+- [3, 'tuple3']
+...
+db.snapshot()
+---
+- ok
+...
+-- A test case for https://github.com/bee/bee/issues/112:
+-- Bee crashes with SIGSEGV during reload configuration
+--
+-- log level
+db.cfg{log_level=5}
+---
+...
+-- constants
+db.cfg{custom_proc_title="custom proc title"}
+---
+- error: Can't set option 'custom_proc_title' dynamically
+...
+db.cfg{wal_dir="dynamic"}
+---
+- error: Can't set option 'wal_dir' dynamically
+...
+db.cfg{snap_dir="dynamic"}
+---
+- error: Can't set option 'snap_dir' dynamically
+...
+db.cfg{logger="new logger"}
+---
+- error: Can't set option 'logger' dynamically
+...
+-- bad1
+db.cfg{slab_alloc_arena=0.2}
+---
+- error: Can't set option 'slab_alloc_arena' dynamically
+...
+db.cfg.slab_alloc_arena
+---
+- 0.1
+...
+space:drop()
+---
+...
+db.cfg{snap_io_rate_limit=0}
+---
+...
+db.cfg{io_collect_interval=0}
+---
+...
+db.cfg{too_long_threshold=0.5}
+---
+...

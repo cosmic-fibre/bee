@@ -1,0 +1,1 @@
+/usr/bin/cc   -fno-omit-frame-pointer -fno-stack-protector -fexceptions -funwind-tables -fopenmp -msse2 -g -ggdb -O0    CMakeFiles/txt2c.dir/txt2c.c.o  -o txt2c -rdynamic 

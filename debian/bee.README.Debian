@@ -1,0 +1,8 @@
+To create new instance You should:
+
+  1. place instance_name.cfg into /etc/bee/instances.available/
+  2. create symlink
+  	 /etc/bee/instances.available/instance_name.cfg ->
+  		/etc/bee/instances.enabled/instance_name.cfg
+  3. do invoke-rc.d bee restart
+

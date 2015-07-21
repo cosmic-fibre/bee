@@ -1,0 +1,48 @@
+Target OS: FreeBSD 8.3 (RELEASE)
+
+1. Install necessary packages:
+-------------
+pkg_add -r sudo git cmake gmake libbfd
+pkg_add -r python27
+
+2. Install gcc 4.6.x and gcc infrastructure pre-requisites
+-------------
+(x) From one of the gcc mirrors download from /gcc/infrastructure: gmp, mpfr and mpc packages;
+(x) Configure and build the pre-requisites using --prefix=/usr/local and --with-gmp=/usr/local (see gcc.gnu.org/install);
+(x) Configure gcc as:
+    configure --prefix=/usr/local --enable-languages=c,c++,objc --program-suffix=463 --enable-shared --enable-threads=posix --with-mpc=/usr/local
+(x) Build gcc as per steps outlined in GCC documentation gcc.gnu.org/install;
+(x) Set up the environment to include the new GCC's libs: export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+
+3. Install necessary python modules:
+-------------
+
+cd /usr/ports/devel/py-yaml
+sudo make install
+
+cd /usr/ports/devel/py-daemon
+sudo make install
+
+4. Download & build bee source code:
+-------------
+
+git clone git://github.com/bee/bee.git
+
+cd bee
+git submodule update --init
+CC=gcc463 CXX=g++463 cmake . -DCMAKE_BUILD_TYPE=RelWithDebugInfo -DENABLE_CLIENT=true
+gmake
+
+5. Set up python 2.6 to run bee tests
+-------------
+
+mkdir ~/build/bin && ln -s /usr/bin/python26 ~/build/bin/python
+
+6. Run bee test suite
+-------------
+
+cd ~/build/bee/test
+PATH=~/build/bin:$PATH ./run
+
+-- EOF
+

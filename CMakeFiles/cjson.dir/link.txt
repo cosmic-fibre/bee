@@ -1,0 +1,2 @@
+/usr/bin/ar cr libcjson.a  CMakeFiles/cjson.dir/third_party/lua-cjson/lua_cjson.c.o CMakeFiles/cjson.dir/third_party/lua-cjson/strbuf.c.o
+/usr/bin/ranlib libcjson.a

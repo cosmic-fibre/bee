@@ -1,0 +1,14 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/wahyu/bee165b/third_party/base64.c
+third_party/base64.h
+/home/wahyu/bee165b/third_party/third_party/base64.h
+
+third_party/base64.h
+

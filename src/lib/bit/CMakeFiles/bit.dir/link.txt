@@ -1,0 +1,2 @@
+/usr/bin/ar cr libbit.a  CMakeFiles/bit.dir/bit.c.o
+/usr/bin/ranlib libbit.a

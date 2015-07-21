@@ -1,0 +1,11 @@
+db.cfg.sham
+---
+- page_size: 131072
+  memory_limit: 0
+  threads: 0
+  node_size: 134217728
+  compression: none
+...
+db.cfg.sham.threads = 3
+---
+...

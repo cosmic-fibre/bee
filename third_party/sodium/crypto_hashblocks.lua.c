@@ -1,0 +1,16 @@
+const char crypto_hashblocks_lua[] =
+"local ffi = require \"ffi\"\n"
+"local lib = ffi.load \"sodium\"\n"
+"\n"
+"ffi.cdef [[\n"
+"size_t crypto_hashblocks_sha256_statebytes(void);\n"
+"size_t crypto_hashblocks_sha256_blockbytes(void);\n"
+"const char * crypto_hashblocks_sha256_primitive(void);\n"
+"int crypto_hashblocks_sha256(unsigned char *,const unsigned char *,unsigned long long);\n"
+"size_t crypto_hashblocks_sha512_statebytes(void);\n"
+"size_t crypto_hashblocks_sha512_blockbytes(void);\n"
+"const char * crypto_hashblocks_sha512_primitive(void);\n"
+"int crypto_hashblocks_sha512(unsigned char *,const unsigned char *,unsigned long long);\n"
+"]]\n"
+""
+;

@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/wahyu/bee165b/src/db/lua/load_cfg.lua.c
+
+/home/wahyu/bee165b/src/db/lua/schema.lua.c
+
+/home/wahyu/bee165b/src/db/lua/session.lua.c
+
+/home/wahyu/bee165b/src/db/lua/snapshot_daemon.lua.c
+
+/home/wahyu/bee165b/src/db/lua/tuple.lua.c
+

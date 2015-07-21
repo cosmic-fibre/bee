@@ -1,0 +1,184 @@
+-- gh-283: Sham: hang after three creates and drops
+s = db.schema.space.create('space0', {engine='sham'})
+---
+...
+i = s:create_index('space0', {type = 'tree', parts = {1, 'STR'}})
+---
+...
+s:insert{'a', 'b', 'c'}
+---
+- ['a', 'b', 'c']
+...
+s:drop()
+---
+...
+sham_schedule()
+---
+...
+s = db.schema.space.create('space0', {engine='sham'})
+---
+...
+i = s:create_index('space0', {type = 'tree', parts = {1, 'STR'}})
+---
+...
+s:insert{'a', 'b', 'c'}
+---
+- ['a', 'b', 'c']
+...
+t = s.index[0]:select({}, {iterator = db.index.ALL})
+---
+...
+t
+---
+- - ['a', 'b', 'c']
+...
+s:drop()
+---
+...
+sham_schedule()
+---
+...
+s = db.schema.space.create('space0', {engine='sham'})
+---
+...
+i = s:create_index('space0', {type = 'tree', parts = {1, 'STR'}})
+---
+...
+s:insert{'a', 'b', 'c'}
+---
+- ['a', 'b', 'c']
+...
+t = s.index[0]:select({}, {iterator = db.index.ALL})
+---
+...
+t
+---
+- - ['a', 'b', 'c']
+...
+s:drop()
+---
+...
+sham_schedule()
+---
+...
+-- gh-280: Sham: crash if insert without index
+s = db.schema.space.create('test', {engine='sham'})
+---
+...
+s:insert{'a'}
+---
+- error: 'No index #0 is defined in space ''test'''
+...
+s:drop()
+---
+...
+sham_schedule()
+---
+...
+-- gh-436: No error when creating temporary sham space
+s = db.schema.space.create('tester',{engine='sham', temporary=true})
+---
+- error: 'Can''t modify space ''tester'': space does not support temporary flag'
+...
+-- gh-432: Sham: ignored limit
+s = db.schema.space.create('tester',{engine='sham'})
+---
+...
+i = s:create_index('sham_index', {})
+---
+...
+for v=1, 100 do s:insert({v}) end
+---
+...
+t = s:select({''},{iterator='GT', limit =1})
+---
+- error: 'Supplied key type of part 0 does not match index part type: expected NUM'
+...
+t
+---
+- - ['a', 'b', 'c']
+...
+t = s:select({},{iterator='GT', limit =1})
+---
+...
+t
+---
+- - [1]
+...
+s:drop()
+---
+...
+sham_schedule()
+---
+...
+s = db.schema.space.create('tester', {engine='sham'})
+---
+...
+i = s:create_index('sham_index', {type = 'tree', parts = {1, 'STR'}})
+---
+...
+for v=1, 100 do s:insert({tostring(v)}) end
+---
+...
+t = s:select({''},{iterator='GT', limit =1})
+---
+...
+t
+---
+- - ['1']
+...
+t = s:select({},{iterator='GT', limit =1})
+---
+...
+t
+---
+- - ['1']
+...
+s:drop()
+---
+...
+sham_schedule()
+---
+...
+-- gh-680: Sham: assertion on update
+s = db.schema.space.create('tester', {engine='sham'})
+---
+...
+i = s:create_index('primary',{type = 'tree', parts = {2, 'STR'}})
+---
+...
+s:insert{1,'X'}
+---
+- [1, 'X']
+...
+s:update({'X'}, {{'=', 2, 'Y'}})
+---
+- error: Attempt to modify a tuple field which is part of index 'primary' in space
+    'tester'
+...
+s:select{'X'}
+---
+- - [1, 'X']
+...
+s:select{'Y'}
+---
+- []
+...
+s:update({'X'}, {{'=', 3, 'Z'}})
+---
+- [1, 'X', 'Z']
+...
+s:select{'X'}
+---
+- - [1, 'X', 'Z']
+...
+s:select{'Y'}
+---
+- []
+...
+s:drop()
+---
+...
+sham_schedule()
+---
+...

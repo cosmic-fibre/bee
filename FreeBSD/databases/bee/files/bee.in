@@ -1,0 +1,27 @@
+#!/bin/sh
+#
+# $FreeBSD: databases/bee/files/bee.in 308708 2012-12-11 20:00:36Z rm $
+
+# PROVIDE: bee
+# REQUIRE: LOGIN
+# KEYWORD: shutdown
+#
+# bee_enable="YES"
+# bee_config=""
+#
+
+. /etc/rc.subr
+
+name="bee"
+rcvar=bee_enable
+
+load_rc_config "$name"
+
+bee_enable=${bee_enable:-"NO"}
+bee_config=${bee_config:-"%%ETCDIR%%/$name.cfg"}
+
+command="%%PREFIX%%/bin/bee_db"
+command_args="--daemonize --config ${bee_config}"
+pidfile="/var/run/$name.pid"
+
+run_rc_command "$1"

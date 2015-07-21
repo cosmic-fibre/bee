@@ -1,0 +1,2 @@
+/usr/bin/ar cr libgopt.a  CMakeFiles/gopt.dir/third_party/gopt/gopt.c.o
+/usr/bin/ranlib libgopt.a

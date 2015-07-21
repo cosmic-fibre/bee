@@ -1,0 +1,2 @@
+bee: unstripped-binary-or-object usr/bin/bee
+bee: embedded-library usr/bin/bee: libyaml

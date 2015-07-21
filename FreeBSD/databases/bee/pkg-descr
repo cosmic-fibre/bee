@@ -1,0 +1,5 @@
+Bee/Db, or simply Bee, is a high performance key/value
+storage server. The code is available for free under the terms of
+BSD license. Supported platforms are GNU/Linux and FreeBSD.
+
+WWW: http://bee.org/

@@ -1,0 +1,597 @@
+--# push filter 'table: .*' to 'table: <address>'
+-- gh-266: db.info() crash on uncofigured db
+package.loaded['db.space'] == nil
+---
+- true
+...
+package.loaded['db.index'] == nil
+---
+- true
+...
+package.loaded['db.tuple'] == nil
+---
+- true
+...
+package.loaded['db.error'] == nil
+---
+- true
+...
+package.loaded['db.info'] == nil
+---
+- true
+...
+package.loaded['db.stat'] == nil
+---
+- true
+...
+package.loaded['db.session'] == nil
+---
+- true
+...
+space = db.schema.space.create('tweedledum')
+---
+...
+index = space:create_index('primary', { type = 'hash' })
+---
+...
+-- Test Lua from admin console. Whenever producing output,
+-- make sure it's a valid YAML.
+'  lua says: hello'
+---
+- '  lua says: hello'
+...
+-- # What's in the db?
+t = {} for n in pairs(db) do table.insert(t, tostring(n)) end table.sort(t)
+---
+...
+t
+---
+- - begin
+  - cfg
+  - commit
+  - error
+  - index
+  - info
+  - internal
+  - rollback
+  - runtime
+  - schema
+  - session
+  - slab
+  - snapshot
+  - space
+  - stat
+  - tuple
+...
+t = nil
+---
+...
+----------------
+-- # db.error
+----------------
+--# stop server default
+--# start server default
+db.error.last()
+---
+- null
+...
+db.error({code = 123, reason = 'test'})
+---
+- error: test
+...
+db.error(db.error.ILLEGAL_PARAMS, "bla bla")
+---
+- error: Illegal parameters, bla bla
+...
+db.error()
+---
+- error: Illegal parameters, bla bla
+...
+db.error.raise()
+---
+- error: Illegal parameters, bla bla
+...
+db.error.last()
+---
+- type: ClientError
+  message: Illegal parameters, bla bla
+  code: 1
+...
+db.error.clear()
+---
+...
+db.error.last()
+---
+- null
+...
+db.error.raise()
+---
+...
+space = db.space.tweedledum
+---
+...
+----------------
+-- # db.stat
+----------------
+t = {}
+---
+...
+--# setopt delimiter ';'
+for k, v in pairs(db.stat()) do
+    table.insert(t, k)
+end;
+---
+...
+for k, v in pairs(db.stat().DELETE) do
+    table.insert(t, k)
+end;
+---
+...
+for k, v in pairs(db.stat.DELETE) do
+    table.insert(t, k)
+end;
+---
+...
+t;
+---
+- - DELETE
+  - EVAL
+  - SELECT
+  - REPLACE
+  - INSERT
+  - AUTH
+  - CALL
+  - UPDATE
+  - total
+  - rps
+  - total
+  - rps
+...
+----------------
+-- # db.space
+----------------
+type(db);
+---
+- table
+...
+type(db.space);
+---
+- table
+...
+t = {};
+---
+...
+for i, v in pairs(space.index[0].parts[1]) do
+    table.insert(t, tostring(i)..' : '..tostring(v))
+end;
+---
+...
+t;
+---
+- - 'type : NUM'
+  - 'fieldno : 1'
+...
+----------------
+-- # db.slab
+----------------
+string.match(tostring(db.slab.info()), '^table:') ~= nil;
+---
+- true
+...
+db.slab.info().arena_used >= 0;
+---
+- true
+...
+db.slab.info().arena_size > 0;
+---
+- true
+...
+string.match(tostring(db.slab.info().slabs), '^table:') ~= nil;
+---
+- true
+...
+t = {};
+---
+...
+for k, v in pairs(db.slab.info()) do
+    table.insert(t, k)
+end;
+---
+...
+t;
+---
+- - arena_used_ratio
+  - items_used_ratio
+  - arena_used
+  - arena_size
+  - slabs
+...
+db.runtime.info().used > 0;
+---
+- true
+...
+db.runtime.info().maxalloc > 0;
+---
+- true
+...
+--
+-- gh-502: db.slab.info() excessively sparse array
+--
+type(require('yaml').encode(db.slab.info()));
+---
+- string
+...
+----------------
+-- # db.error
+----------------
+t = {}
+for k,v in pairs(db.error) do
+   table.insert(t, 'db.error.'..tostring(k)..' : '..tostring(v))
+end;
+---
+...
+t;
+---
+- - 'db.error.CANT_UPDATE_PRIMARY_KEY : 94'
+  - 'db.error.EXACT_MATCH : 19'
+  - 'db.error.NO_SUCH_TRIGGER : 34'
+  - 'db.error.CLUSTER_ID_IS_RO : 65'
+  - 'db.error.INDEX_TYPE : 13'
+  - 'db.error.CLUSTER_ID_MISMATCH : 63'
+  - 'db.error.MEMORY_ISSUE : 2'
+  - 'db.error.KEY_PART_TYPE : 18'
+  - 'db.error.CREATE_FUNCTION : 50'
+  - 'db.error.SHAM : 60'
+  - 'db.error.NO_SUCH_INDEX : 35'
+  - 'db.error.TUPLE_IS_TOO_LONG : 27'
+  - 'db.error.UNKNOWN_SERVER : 62'
+  - 'db.error.FUNCTION_EXISTS : 52'
+  - 'db.error.NO_SUCH_FUNCTION : 51'
+  - 'db.error.ROLE_LOOP : 87'
+  - 'db.error.TUPLE_NOT_FOUND : 4'
+  - 'db.error.DROP_USER : 44'
+  - 'db.error.CROSS_ENGINE_TRANSACTION : 81'
+  - 'db.error.MODIFY_INDEX : 14'
+  - 'db.error.TUPLE_FOUND : 3'
+  - 'db.error.PASSWORD_MISMATCH : 47'
+  - 'db.error.TRANSACTION_CONFLICT : 97'
+  - 'db.error.NO_SUCH_ENGINE : 57'
+  - 'db.error.FIELD_TYPE : 23'
+  - 'db.error.ACCESS_DENIED : 42'
+  - 'db.error.UPDATE_INTEGER_OVERFLOW : 95'
+  - 'db.error.LAST_DROP : 15'
+  - 'db.error.USER_EXISTS : 46'
+  - 'db.error.WAL_IO : 40'
+  - 'db.error.MISSING_SNAPSHOT : 93'
+  - 'db.error.CREATE_USER : 43'
+  - 'db.error.DROP_PRIMARY_KEY : 17'
+  - 'db.error.PRIV_GRANTED : 89'
+  - 'db.error.CREATE_SPACE : 9'
+  - 'db.error.PRIV_NOT_GRANTED : 91'
+  - 'db.error.GRANT : 88'
+  - 'db.error.ROLE_GRANTED : 90'
+  - 'db.error.TUPLE_REF_OVERFLOW : 86'
+  - 'db.error.UNKNOWN_SCHEMA_OBJECT : 49'
+  - 'db.error.PROC_LUA : 32'
+  - 'db.error.CREATE_ROLE : 84'
+  - 'db.error.ROLE_EXISTS : 83'
+  - 'db.error.NO_SUCH_ROLE : 82'
+  - 'db.error.NO_ACTIVE_TRANSACTION : 80'
+  - 'db.error.injection : table: <address>
+  - 'db.error.FIELD_TYPE_MISMATCH : 24'
+  - 'db.error.UNSUPPORTED : 5'
+  - 'db.error.INVALID_MSGPACK : 20'
+  - 'db.error.KEY_PART_COUNT : 31'
+  - 'db.error.ALTER_SPACE : 12'
+  - 'db.error.ACTIVE_TRANSACTION : 79'
+  - 'db.error.NO_CONNECTION : 77'
+  - 'db.error.GUEST_USER_PASSWORD : 96'
+  - 'db.error.INVALID_XLOG_NAME : 75'
+  - 'db.error.INVALID_XLOG : 74'
+  - 'db.error.REPLICA_MAX : 73'
+  - 'db.error.ITERATOR_TYPE : 72'
+  - 'db.error.NONMASTER : 6'
+  - 'db.error.SPACE_EXISTS : 10'
+  - 'db.error.MISSING_REQUEST_FIELD : 69'
+  - 'db.error.IDENTIFIER : 70'
+  - 'db.error.FIBER_STACK : 30'
+  - 'db.error.DROP_FUNCTION : 71'
+  - 'db.error.INVALID_ORDER : 68'
+  - 'db.error.CFG : 59'
+  - 'db.error.SPACE_FIELD_COUNT : 38'
+  - 'db.error.UNKNOWN : 0'
+  - 'db.error.NO_SUCH_FIELD : 37'
+  - 'db.error.LOCAL_SERVER_IS_NOT_ACTIVE : 61'
+  - 'db.error.RELOAD_CFG : 58'
+  - 'db.error.PROC_RET : 21'
+  - 'db.error.INJECTION : 8'
+  - 'db.error.FUNCTION_MAX : 54'
+  - 'db.error.ILLEGAL_PARAMS : 1'
+  - 'db.error.TUPLE_FORMAT_LIMIT : 16'
+  - 'db.error.USER_MAX : 56'
+  - 'db.error.INVALID_UUID : 64'
+  - 'db.error.SPLICE : 25'
+  - 'db.error.TIMEOUT : 78'
+  - 'db.error.MORE_THAN_ONE_TUPLE : 41'
+  - 'db.error.NO_SUCH_SPACE : 36'
+  - 'db.error.INDEX_EXISTS : 85'
+  - 'db.error.UPDATE_FIELD : 29'
+  - 'db.error.ARG_TYPE : 26'
+  - 'db.error.INDEX_FIELD_COUNT : 39'
+  - 'db.error.READONLY : 7'
+  - 'db.error.ROLE_NOT_GRANTED : 92'
+  - 'db.error.DROP_SPACE : 11'
+  - 'db.error.UNKNOWN_REQUEST_TYPE : 48'
+  - 'db.error.INVALID_XLOG_ORDER : 76'
+  - 'db.error.SPACE_ACCESS_DENIED : 55'
+  - 'db.error.NO_SUCH_USER : 45'
+  - 'db.error.UNKNOWN_UPDATE_OP : 28'
+  - 'db.error.TUPLE_NOT_ARRAY : 22'
+  - 'db.error.NO_SUCH_PROC : 33'
+  - 'db.error.FUNCTION_ACCESS_DENIED : 53'
+...
+--# setopt delimiter ''
+-- A test case for Bug#901674
+-- No way to inspect exceptions from Db in Lua
+--
+function myinsert(tuple) db.space.tweedledum:insert(tuple) end
+---
+...
+pcall(myinsert, {99, 1, 1953719668})
+---
+- true
+...
+pcall(myinsert, {1, 'hello'})
+---
+- true
+...
+pcall(myinsert, {1, 'hello'})
+---
+- false
+- Duplicate key exists in unique index 'primary' in space 'tweedledum'
+...
+db.space.tweedledum:truncate()
+---
+...
+myinsert = nil
+---
+...
+-- A test case for gh-37: print of 64-bit number
+1, 1
+---
+- 1
+- 1
+...
+tonumber64(1), 1
+---
+- 1
+- 1
+...
+-- Testing 64bit
+tonumber64()
+---
+- error: 'tonumber64: wrong number of arguments'
+...
+tonumber64('invalid number')
+---
+- null
+...
+tonumber64(123)
+---
+- 123
+...
+tonumber64('123')
+---
+- 123
+...
+type(tonumber64('4294967296')) == 'number'
+---
+- true
+...
+tonumber64('9223372036854775807') == tonumber64('9223372036854775807')
+---
+- true
+...
+tonumber64('9223372036854775807') - tonumber64('9223372036854775800')
+---
+- 7
+...
+tonumber64('18446744073709551615') == tonumber64('18446744073709551615')
+---
+- true
+...
+tonumber64('18446744073709551615') + 1
+---
+- 0
+...
+tonumber64(-1)
+---
+- -1
+...
+tonumber64('184467440737095516155')
+---
+- null
+...
+string.byte(require('msgpack').encode(tonumber64(123)))
+---
+- 123
+...
+--  A test case for Bug#1061747 'tonumber64 is not transitive'
+tonumber64(tonumber64(2))
+---
+- 2
+...
+tostring(tonumber64(tonumber64(3)))
+---
+- '3'
+...
+--  A test case for Bug#1131108 'tonumber64 from negative int inconsistency'
+tonumber64(-1)
+---
+- -1
+...
+tonumber64(-1LL)
+---
+- -1
+...
+tonumber64(-1ULL)
+---
+- 18446744073709551615
+...
+-1
+---
+- -1
+...
+-1LL
+---
+- -1
+...
+-1ULL
+---
+- 18446744073709551615
+...
+tonumber64(-1.0)
+---
+- -1
+...
+6LL - 7LL
+---
+- -1
+...
+--  dostring()
+dostring('abc')
+---
+- error: '[string "abc"]:1: ''='' expected near ''<eof>'''
+...
+dostring('abc=2')
+---
+...
+dostring('return abc')
+---
+- 2
+...
+dostring('return ...', 1, 2, 3)
+---
+- 1
+- 2
+- 3
+...
+--  A test case for Bug#1043804 lua error() -> server crash
+error()
+---
+- error: null
+...
+--  A test case for bitwise operations 
+bit.lshift(1, 32)
+---
+- 1
+...
+bit.band(1, 3)
+---
+- 1
+...
+bit.bor(1, 2)
+---
+- 3
+...
+-- A test case for space:inc and space:dec
+space = db.space.tweedledum
+---
+...
+space:inc{1}
+---
+- 1
+...
+space:get{1}
+---
+- [1, 1]
+...
+space:inc{1}
+---
+- 2
+...
+space:inc{1}
+---
+- 3
+...
+space:get{1}
+---
+- [1, 3]
+...
+space:dec{1}
+---
+- 2
+...
+space:dec{1}
+---
+- 1
+...
+space:dec{1}
+---
+- 0
+...
+space:get{1}
+---
+...
+space:truncate()
+---
+...
+dofile('fifo.lua')
+---
+...
+fifomax
+---
+- 5
+...
+fifo_push(space, 1, 1)
+---
+- [1, 4, 5, 1, 0, 0, 0, 0]
+...
+fifo_push(space, 1, 2)
+---
+- [1, 5, 6, 1, 2, 0, 0, 0]
+...
+fifo_push(space, 1, 3)
+---
+- [1, 6, 7, 1, 2, 3, 0, 0]
+...
+fifo_push(space, 1, 4)
+---
+- [1, 7, 8, 1, 2, 3, 4, 0]
+...
+fifo_push(space, 1, 5)
+---
+- [1, 8, 4, 1, 2, 3, 4, 5]
+...
+fifo_push(space, 1, 6)
+---
+- [1, 4, 5, 6, 2, 3, 4, 5]
+...
+fifo_push(space, 1, 7)
+---
+- [1, 5, 6, 6, 7, 3, 4, 5]
+...
+fifo_push(space, 1, 8)
+---
+- [1, 6, 7, 6, 7, 8, 4, 5]
+...
+fifo_top(space, 1)
+---
+- 8
+...
+space:delete{1}
+---
+- [1, 6, 7, 6, 7, 8, 4, 5]
+...
+fifo_top(space, 1)
+---
+- 0
+...
+space:delete{1}
+---
+- [1, 4, 4, 0, 0, 0, 0, 0]
+...
+space:drop()
+---
+...
+--# clear filter

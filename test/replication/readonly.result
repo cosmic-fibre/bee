@@ -1,0 +1,41 @@
+db.schema.user.grant('guest', 'replication')
+---
+...
+db.info.server.id
+---
+- 2
+...
+db.info.server.ro
+---
+- false
+...
+db.info.server.lsn
+---
+- 0
+...
+-------------------------------------------------------------
+replica is read-only until receive self server_id in _cluster
+-------------------------------------------------------------
+db.cfg{replication_source = ""}
+---
+...
+db.info.server.id
+---
+- 0
+...
+db.info.server.ro
+---
+- true
+...
+db.info.server.lsn
+---
+- -1
+...
+space = db.schema.space.create("ro")
+---
+- error: Can't modify data because this server in read-only mode.
+...
+db.info.vclock[2]
+---
+- null
+...

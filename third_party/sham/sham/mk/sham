@@ -1,0 +1,37 @@
+
+# sham build configuration
+#
+
+SHAM_VMAJOR   = 1
+SHAM_VMINOR   = 2
+SHAM_BUILD   := $(shell git rev-parse --short HEAD)
+SHAM_DIRS     = rt version transaction log database index repository sham
+
+CC             ?= gcc
+E               = @echo
+Q               = @
+
+ifndef buildworld
+INCLUDE_A       =
+INCLUDE_B       = $(addprefix -I../, $(SHAM_DIRS))
+INCLUDE_C       = -I../
+INCLUDE         = $(INCLUDE_A) $(INCLUDE_B) $(INCLUDE_C)
+else
+INCLUDE_A       = $(addprefix -I, $(SHAM_DIRS))
+INCLUDE_B       = 
+INCLUDE         = $(INCLUDE_A) $(INCLUDE_B)
+endif
+
+CFLAGS_INCLUDE  = -pthread $(INCLUDE)
+CFLAGS_DEBUG    = -DSR_INJECTION_ENABLE
+CFLAGS_OPT      = -O0
+CFLAGS_STRICT   = -std=c99 -pedantic -Wextra -Wall -fsyntax-only
+CFLAGS_BUILD    = -DSHAM_BUILD='"${SHAM_BUILD}"'
+CFLAGS_SHAM   = $(CFLAGS_INCLUDE) \
+                  $(CFLAGS_DEBUG) \
+                  $(CFLAGS_OPT) \
+                  $(CFLAGS_STRICT) \
+                  $(CFLAGS_BUILD) \
+                  $(CFLAGS)
+
+# vim: syntax=make

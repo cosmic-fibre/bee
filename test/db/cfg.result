@@ -1,0 +1,173 @@
+--# push filter 'listen: .*' to 'primary: <uri>'
+--# push filter 'admin: .*' to 'admin: <uri>'
+db.cfg.nosuchoption = 1
+---
+- error: '[string "-- load_cfg.lua - internal file..."]:265: Attempt to modify a read-only
+    table'
+...
+t = {} for k,v in pairs(db.cfg) do if type(v) ~= 'table' and type(v) ~= 'function' then table.insert(t, k..': '..tostring(v)) end end
+---
+...
+t
+---
+- - 'snapshot_count: 6'
+  - 'too_long_threshold: 0.5'
+  - 'slab_alloc_factor: 1.1'
+  - 'slab_alloc_maximal: 1048576'
+  - 'background: false'
+  - 'slab_alloc_arena: 0.1'
+  - 'primary: <uri>
+  - 'logger_nonblock: true'
+  - 'snap_dir: .'
+  - 'coredump: false'
+  - 'slab_alloc_minimal: 16'
+  - 'sham_dir: .'
+  - 'wal_mode: write'
+  - 'wal_dir: .'
+  - 'panic_on_snap_error: true'
+  - 'panic_on_wal_error: true'
+  - 'log_level: 5'
+  - 'readahead: 16320'
+  - 'pid_file: bee.pid'
+  - 'rows_per_wal: 50'
+  - 'snapshot_period: 0'
+  - 'wal_dir_rescan_delay: 0.1'
+...
+-- must be read-only
+db.cfg()
+---
+- error: '[string "-- load_cfg.lua - internal file..."]:211: bad argument #1 to ''pairs''
+    (table expected, got nil)'
+...
+t = {} for k,v in pairs(db.cfg) do if type(v) ~= 'table' and type(v) ~= 'function' then table.insert(t, k..': '..tostring(v)) end end
+---
+...
+t
+---
+- - 'snapshot_count: 6'
+  - 'too_long_threshold: 0.5'
+  - 'slab_alloc_factor: 1.1'
+  - 'slab_alloc_maximal: 1048576'
+  - 'background: false'
+  - 'slab_alloc_arena: 0.1'
+  - 'primary: <uri>
+  - 'logger_nonblock: true'
+  - 'snap_dir: .'
+  - 'coredump: false'
+  - 'slab_alloc_minimal: 16'
+  - 'sham_dir: .'
+  - 'wal_mode: write'
+  - 'wal_dir: .'
+  - 'panic_on_snap_error: true'
+  - 'panic_on_wal_error: true'
+  - 'log_level: 5'
+  - 'readahead: 16320'
+  - 'pid_file: bee.pid'
+  - 'rows_per_wal: 50'
+  - 'snapshot_period: 0'
+  - 'wal_dir_rescan_delay: 0.1'
+...
+-- check that cfg with unexpected parameter fails.
+db.cfg{sherlock = 'holmes'}
+---
+- error: '[string "-- load_cfg.lua - internal file..."]:167: Error: cfg parameter
+    ''sherlock'' is unexpected'
+...
+-- check that cfg with unexpected type of parameter failes
+db.cfg{listen = {}}
+---
+- error: '[string "-- load_cfg.lua - internal file..."]:187: Error: cfg parameter
+    ''listen'' should be one of types: string, number'
+...
+db.cfg{wal_dir = 0}
+---
+- error: '[string "-- load_cfg.lua - internal file..."]:181: Error: cfg parameter
+    ''wal_dir'' should be of type string'
+...
+db.cfg{coredump = 'true'}
+---
+- error: '[string "-- load_cfg.lua - internal file..."]:181: Error: cfg parameter
+    ''coredump'' should be of type boolean'
+...
+--------------------------------------------------------------------------------
+-- Test of hierarchical cfg type check
+--------------------------------------------------------------------------------
+db.cfg{slab_alloc_arena = "100500"}
+---
+- error: '[string "-- load_cfg.lua - internal file..."]:181: Error: cfg parameter
+    ''slab_alloc_arena'' should be of type number'
+...
+db.cfg{sham = "sham"}
+---
+- error: '[string "-- load_cfg.lua - internal file..."]:175: Error: cfg parameter
+    ''sham'' should be a table'
+...
+db.cfg{sham = {threads = "threads"}}
+---
+- error: '[string "-- load_cfg.lua - internal file..."]:181: Error: cfg parameter
+    ''sham.threads'' should be of type number'
+...
+--------------------------------------------------------------------------------
+-- Test of default cfg options
+--------------------------------------------------------------------------------
+--# create server cfg_tester1 with script = "db/lua/cfg_test1.lua"
+--# start server cfg_tester1
+--# create connection cfg_tester_con to cfg_tester1
+--# set connection cfg_tester_con
+db.cfg.slab_alloc_arena, db.cfg.slab_alloc_factor, db.cfg.sham.threads, db.cfg.sham.page_size
+---
+- 1
+- 1.1
+- 5
+- 131072
+...
+--# set connection default
+--# drop connection cfg_tester_con
+--# stop server cfg_tester1
+--# cleanup server cfg_tester1
+--# create server cfg_tester2 with script = "db/lua/cfg_test2.lua"
+--# start server cfg_tester2
+--# create connection cfg_tester_con to cfg_tester2
+--# set connection cfg_tester_con
+db.cfg.slab_alloc_arena, db.cfg.slab_alloc_factor, db.cfg.sham.threads, db.cfg.sham.page_size
+---
+- 0.2
+- 1.1
+- 5
+- 131072
+...
+--# set connection default
+--# drop connection cfg_tester_con
+--# stop server cfg_tester2
+--# cleanup server cfg_tester2
+--# create server cfg_tester3 with script = "db/lua/cfg_test3.lua"
+--# start server cfg_tester3
+--# create connection cfg_tester_con to cfg_tester3
+--# set connection cfg_tester_con
+db.cfg.slab_alloc_arena, db.cfg.slab_alloc_factor, db.cfg.sham.threads, db.cfg.sham.page_size
+---
+- 0.2
+- 1.1
+- 10
+- 131072
+...
+--# set connection default
+--# drop connection cfg_tester_con
+--# stop server cfg_tester3
+--# cleanup server cfg_tester3
+--# create server cfg_tester4 with script = "db/lua/cfg_test4.lua"
+--# start server cfg_tester4
+--# create connection cfg_tester_con to cfg_tester4
+--# set connection cfg_tester_con
+db.cfg.slab_alloc_arena, db.cfg.slab_alloc_factor, db.cfg.sham.threads, db.cfg.sham.page_size
+---
+- 1
+- 3.14
+- 5
+- 1234
+...
+--# set connection default
+--# drop connection cfg_tester_con
+--# stop server cfg_tester4
+--# cleanup server cfg_tester4
+--# clear filter

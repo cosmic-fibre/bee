@@ -1,0 +1,168 @@
+---
+title   : "Bee - Download"
+slug    : "download"
+save_as : "download.html"
+template: "download"
+blocks :
+  top :
+    title : "Binary downloads"
+    content:
+      format : rst
+      content: |
+        To simplify problem analysis and avoid various bugs induced by compilation
+        parameters and environment, it is recommended that production systems use the
+        builds provided on this site.
+
+        All published releases are available at `<http://bee.org/dist/master>`_
+  binarylist :
+    - - "Ubuntu"
+      - format : rst
+        content: |
+          We maintain an always up-to-date Ubuntu package repository at
+          `<http://bee.org/dist/master/ubuntu>`_.
+
+          At the moment the repository contains builds for Ubuntu
+          "Precise", "Trusty", "Saucy". It can be added to your
+          apt sources list with:
+
+          .. code-block:: bash
+
+            wget http://bee.org/dist/public.key
+            sudo apt-key add ./public.key
+            release=`lsb_release -c -s`
+
+            cat > /etc/apt/sources.list.d/bee.list <<- EOF
+            deb http://bee.org/dist/master/ubuntu/ $release main
+            deb-src http://bee.org/dist/master/ubuntu/ $release main
+            EOF
+
+            sudo apt-get update
+            sudo apt-get install bee
+    - - "Debian GNU/Linux"
+      - format : rst
+        content: |
+          We maintain an always up-to-date Debian GNU/Linux
+          package repository at
+          `<http://bee.org/dist/master/debian>`_.
+
+          At the moment the repository contains builds for
+          Debian "Sid", "Jessie", "Wheezy". It can be added
+          to your apt sources list with:
+
+          .. code-block:: bash
+
+            wget http://bee.org/dist/public.key
+            sudo apt-key add ./public.key
+            release=`lsb_release -c -s`
+
+            cat > /etc/apt/sources.list.d/bee.list <<- EOF
+            deb http://bee.org/dist/master/debian/ $release main
+            deb-src http://bee.org/dist/master/debian/ $release main
+            EOF
+
+            sudo apt-get update
+            sudo apt-get install bee
+    - - "OS X"
+      - format : rst
+        content: |
+          You can install Bee using homebrew:
+
+          .. code-block:: bash
+
+            $ brew install http://build.bee.org/bee.rb --devel
+
+          Please upgrade ``clang`` to version 3.2 or later using
+          ``Command Line Tools for Xcode`` disk image version 4.6+
+          from `Apple Developer`_ web-site.
+
+          .. _Apple Developer: https://developer.apple.com/downloads/
+    - - "Fedora 19, 20 and Rawhide"
+      - format : rst
+        content: |
+          Fedora repository is available at
+          `<http://bee.org/dist/master/fedora>`_
+
+          Add the following section to your yum repository list
+          ``/etc/yum.repos.d/bee.repo`` to enable it:
+
+          .. code-block:: ini
+
+            [bee]
+            name=Fedora-$releasever - Bee
+            baseurl=http://bee.org/dist/master/fedora/$releasever/$basearch/
+            enabled=1
+            gpgcheck=0
+    - - "CentOS 5-7 and RHEL 5-7"
+      - format : rst
+        content: |
+          CentOS and RHEL repository is available at
+          `<http://bee.org/dist/master/centos>`_
+
+          Add the following section to your yum repository list
+          ``/etc/yum.repos.d/bee.repo`` to enable it:
+
+          .. code-block:: ini
+
+            [bee]
+            name=CentOS-$releasever - Bee
+            baseurl=http://bee.org/dist/master/centos/$releasever/os/$basearch/
+            enabled=1
+            gpgcheck=0
+    - - "Gentoo Linux"
+      - format : rst
+        content: |
+          Bee is available from ``bee`` portage overlay. Use layman_
+          to add the overlay to your system:
+
+          .. code-block:: bash
+
+            $ layman -S
+            $ layman -a bee
+            $ emerge dev-db/bee -av
+
+          .. _layman: http://wiki.gentoo.org/wiki/Layman
+    - - "FreeBSD"
+      - format : rst
+        content: |
+          Bee is available from the FreeBSD
+          Ports collection (`databases/bee`_).
+
+          .. _databases/bee: http://freshports.org/databases/bee
+  gimemore :
+    title : "Connectors & Extras"
+    content: ""
+  gimemorelist:
+    - - "Connectors"
+      - format : rst
+        content: |
+          - PHP driver,        `<https://github.com/bee/bee-php>`_
+          - Java driver,       `Maven repository`_
+          - Python driver,     `<http://pypi.python.org/pypi/bee>`_
+          - Ruby driver,       `<https://github.com/funny-falcon/bee16-ruby>`_
+          - Perl driver,       `DR:Bee`_
+          - C connector        `<https://github.com/bee/bee-c>`_
+          - node.js driver,    `<https://github.com/KlonD90/node-bee-driver>`_
+          - Erlang driver,     `<https://github.com/rtsisyk/ebee>`_
+          - Go driver,         `<https://github.com/mialinx/go-bee-1.6>`_
+          - Lua-nginx driver,  `<https://github.com/ziontab/lua-nginx-bee>`_
+
+          .. _DR\:Bee:    http://search.cpan.org/~unera/DR-Bee-0.42/lib/DR/Bee.pm
+          .. _Maven repository: http://github.com/bee/bee-java
+    - - "Source tarball"
+      - format : rst
+        content: |
+          The latest source archive is `bee-@PACKAGE_VERSION@-src.tar.gz`_.
+          Please consult with README for build instructions on your system.
+
+          .. _bee-@PACKAGE_VERSION@-src.tar.gz: http://bee.org/dist/master/bee-@PACKAGE_VERSION@-src.tar.gz
+    - - "Old master branch"
+      - format : rst
+        content: |
+          In the same manner as for `the master branch`_, every push into
+          `the old master`_ is `available online`_.
+
+          .. _the master branch: http://github.com/bee/bee/tree/master
+          .. _the old master:    http://github.com/bee/bee/tree/stable
+          .. _available online:  http://bee.org/dist/stable
+...
+# vim: ts=2 expandtab syntax=yaml

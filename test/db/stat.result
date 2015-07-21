@@ -1,0 +1,81 @@
+-- clear statistics
+--# stop server default
+--# start server default
+db.stat.INSERT.total
+---
+- 0
+...
+db.stat.DELETE.total
+---
+- 0
+...
+db.stat.UPDATE.total
+---
+- 0
+...
+db.stat.REPLACE.total
+---
+- 0
+...
+db.stat.SELECT.total
+---
+- 0
+...
+space = db.schema.space.create('tweedledum')
+---
+...
+index = space:create_index('primary', { type = 'hash' })
+---
+...
+-- check stat_cleanup
+-- add several tuples
+for i=1,10 do space:insert{i, 'tuple'..tostring(i)} end
+---
+...
+db.stat.INSERT.total
+---
+- 12
+...
+db.stat.DELETE.total
+---
+- 0
+...
+db.stat.UPDATE.total
+---
+- 1
+...
+db.stat.REPLACE.total
+---
+- 0
+...
+db.stat.SELECT.total
+---
+- 1
+...
+--# stop server default
+--# start server default
+-- statistics must be zero
+db.stat.INSERT.total
+---
+- 0
+...
+db.stat.DELETE.total
+---
+- 0
+...
+db.stat.UPDATE.total
+---
+- 0
+...
+db.stat.REPLACE.total
+---
+- 0
+...
+db.stat.SELECT.total
+---
+- 0
+...
+-- cleanup
+db.space.tweedledum:drop()
+---
+...

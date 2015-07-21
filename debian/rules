@@ -1,0 +1,60 @@
+#!/usr/bin/make -f
+
+#DPKG_EXPORT_BUILDFLAGS = 1
+#include /usr/share/dpkg/buildflags.mk
+
+VERSION  := $(shell dpkg-parsechangelog|grep ^Version|awk '{print $$2}')
+UVERSION := $(shell echo $(VERSION)|sed 's/-[[:digit:]]\+$$//')
+
+DEB_CMAKE_EXTRA_FLAGS := \
+	-DCMAKE_BUILD_TYPE=RelWithDebugInfo
+
+DEB_DH_INSTALLINIT_ARGS := --name=bee
+
+DEB_CMAKE_INSTALL_PREFIX := /usr
+DEB_CMAKE_NORMAL_ARGS := -DCMAKE_INSTALL_PREFIX="$(DEB_CMAKE_INSTALL_PREFIX)" \
+	-DCMAKE_SKIP_RPATH=ON \
+	-DCMAKE_VERBOSE_MAKEFILE=ON \
+	-DCMAKE_INSTALL_SYSCONFDIR=/etc \
+	-DCMAKE_INSTALL_LOCALSTATEDIR=/var \
+	-DCMAKE_INSTALL_LIBDIR=/usr/lib
+#     -DCMAKE_C_FLAGS="$(CFLAGS)" \
+#     -DCMAKE_LD_FLAGS="$(LDFLAGS)" \
+#     -DENABLE_STATIC=ON
+#     -DCMAKE_CXX_FLAGS="$(CXXFLAGS)" \
+#     -DCMAKE_CPP_FLAGS="$(CPPFLAGS)" \
+#    -DCMAKE_C_COMPILER:FILEPATH="$(CC)" \
+#    -DCMAKE_CXX_COMPILER:FILEPATH="$(CXX)" \
+
+DEB_SHLIBDEPS_INCLUDE           := /usr/lib/bee
+DEB_INSTALL_DOCS_ALL 		:= -XTODO -XAUTHORS
+DEB_DH_STRIP_ARGS	        := -X/usr/bin/bee
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/cmake.mk
+
+DEB_BUILDDIR := build-area
+
+DIRNAME=$(shell basename $(CURDIR))
+
+
+tarball: clean
+	git describe > VERSION
+	cd .. && tar --exclude=.git --exclude=debian 		\
+		--exclude=rfc4627.txt				\
+		--exclude=doc/www-data/ycsb			\
+		--transform='s,^$(DIRNAME),bee_$(UVERSION),' \
+		-czf bee_$(UVERSION).orig.tar.gz $(DIRNAME)
+
+clean::
+	find -type f -name \*.pyc -delete
+	find -type d -name CMakeFiles -exec rm -fr '{}' +
+	rm -f CMakeCache.txt
+	rm -f CPackConfig.cmake
+	rm -f CPackSourceConfig.cmake
+	rm -f include/bee/config.h
+	rm -f doc/tnt.ent
+	rm -f www-data.in/download
+
+install/bee::
+

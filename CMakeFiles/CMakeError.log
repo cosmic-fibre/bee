@@ -1,0 +1,197 @@
+Determining if the system is big endian passed with the following output:
+Change Dir: /home/wahyu/bee165b/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec1894197056/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec1894197056.dir/build.make CMakeFiles/cmTryCompileExec1894197056.dir/build
+make[1]: Entering directory `/home/wahyu/bee165b/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/wahyu/bee165b/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec1894197056.dir/TestEndianess.c.o
+/usr/bin/cc    -o CMakeFiles/cmTryCompileExec1894197056.dir/TestEndianess.c.o   -c /home/wahyu/bee165b/CMakeFiles/CMakeTmp/TestEndianess.c
+Linking C executable cmTryCompileExec1894197056
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec1894197056.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTryCompileExec1894197056.dir/TestEndianess.c.o  -o cmTryCompileExec1894197056 -rdynamic 
+make[1]: Leaving directory `/home/wahyu/bee165b/CMakeFiles/CMakeTmp'
+
+TestEndianess.c:
+/* A 16 bit integer is required. */
+typedef unsigned short cmakeint16;
+
+/* On a little endian machine, these 16bit ints will give "THIS IS LITTLE ENDIAN."
+   On a big endian machine the characters will be exchanged pairwise. */
+const cmakeint16 info_little[] =  {0x4854, 0x5349, 0x4920, 0x2053, 0x494c, 0x5454, 0x454c, 0x4520, 0x444e, 0x4149, 0x2e4e, 0x0000};
+
+/* on a big endian machine, these 16bit ints will give "THIS IS BIG ENDIAN."
+   On a little endian machine the characters will be exchanged pairwise. */
+const cmakeint16 info_big[] =     {0x5448, 0x4953, 0x2049, 0x5320, 0x4249, 0x4720, 0x454e, 0x4449, 0x414e, 0x2e2e, 0x0000};
+
+#ifdef __CLASSIC_C__
+int main(argc, argv) int argc; char *argv[];
+#else
+int main(int argc, char *argv[])
+#endif
+{
+  int require = 0;
+  require += info_little[argc];
+  require += info_big[argc];
+  (void)argv;
+  return require;
+}
+
+
+Determining if the pthread_yield exist failed with the following output:
+Change Dir: /home/wahyu/bee165b/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec1578055136/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec1578055136.dir/build.make CMakeFiles/cmTryCompileExec1578055136.dir/build
+make[1]: Entering directory `/home/wahyu/bee165b/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/wahyu/bee165b/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec1578055136.dir/CheckSymbolExists.c.o
+/usr/bin/cc   -fno-omit-frame-pointer -fno-stack-protector -fexceptions -funwind-tables -fopenmp -msse2 -mavx   -o CMakeFiles/cmTryCompileExec1578055136.dir/CheckSymbolExists.c.o   -c /home/wahyu/bee165b/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/wahyu/bee165b/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/wahyu/bee165b/CMakeFiles/CMakeTmp/CheckSymbolExists.c:8:19: error: ‘pthread_yield’ undeclared (first use in this function)
+   return ((int*)(&pthread_yield))[argc];
+                   ^
+/home/wahyu/bee165b/CMakeFiles/CMakeTmp/CheckSymbolExists.c:8:19: note: each undeclared identifier is reported only once for each function it appears in
+make[1]: *** [CMakeFiles/cmTryCompileExec1578055136.dir/CheckSymbolExists.c.o] Error 1
+make[1]: Leaving directory `/home/wahyu/bee165b/CMakeFiles/CMakeTmp'
+make: *** [cmTryCompileExec1578055136/fast] Error 2
+
+File /home/wahyu/bee165b/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <pthread.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pthread_yield
+  return ((int*)(&pthread_yield))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the function funopen exists failed with the following output:
+Change Dir: /home/wahyu/bee165b/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec1073855466/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec1073855466.dir/build.make CMakeFiles/cmTryCompileExec1073855466.dir/build
+make[1]: Entering directory `/home/wahyu/bee165b/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/wahyu/bee165b/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec1073855466.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -fno-omit-frame-pointer -fno-stack-protector -fexceptions -funwind-tables -fopenmp -msse2 -DCHECK_FUNCTION_EXISTS=funopen -mavx   -o CMakeFiles/cmTryCompileExec1073855466.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-2.8/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec1073855466
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec1073855466.dir/link.txt --verbose=1
+/usr/bin/cc   -fno-omit-frame-pointer -fno-stack-protector -fexceptions -funwind-tables -fopenmp -msse2 -DCHECK_FUNCTION_EXISTS=funopen -mavx    CMakeFiles/cmTryCompileExec1073855466.dir/CheckFunctionExists.c.o  -o cmTryCompileExec1073855466 -rdynamic 
+CMakeFiles/cmTryCompileExec1073855466.dir/CheckFunctionExists.c.o: In function `main':
+CheckFunctionExists.c:(.text+0x15): undefined reference to `funopen'
+collect2: error: ld returned 1 exit status
+make[1]: *** [cmTryCompileExec1073855466] Error 1
+make[1]: Leaving directory `/home/wahyu/bee165b/CMakeFiles/CMakeTmp'
+make: *** [cmTryCompileExec1073855466/fast] Error 2
+
+
+Determining if the function uuidgen exists failed with the following output:
+Change Dir: /home/wahyu/bee165b/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec2281369951/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec2281369951.dir/build.make CMakeFiles/cmTryCompileExec2281369951.dir/build
+make[1]: Entering directory `/home/wahyu/bee165b/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/wahyu/bee165b/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec2281369951.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -fno-omit-frame-pointer -fno-stack-protector -fexceptions -funwind-tables -fopenmp -msse2 -DCHECK_FUNCTION_EXISTS=uuidgen -mavx   -o CMakeFiles/cmTryCompileExec2281369951.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-2.8/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec2281369951
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec2281369951.dir/link.txt --verbose=1
+/usr/bin/cc   -fno-omit-frame-pointer -fno-stack-protector -fexceptions -funwind-tables -fopenmp -msse2 -DCHECK_FUNCTION_EXISTS=uuidgen -mavx    CMakeFiles/cmTryCompileExec2281369951.dir/CheckFunctionExists.c.o  -o cmTryCompileExec2281369951 -rdynamic 
+CMakeFiles/cmTryCompileExec2281369951.dir/CheckFunctionExists.c.o: In function `main':
+CheckFunctionExists.c:(.text+0x15): undefined reference to `uuidgen'
+collect2: error: ld returned 1 exit status
+make[1]: *** [cmTryCompileExec2281369951] Error 1
+make[1]: Leaving directory `/home/wahyu/bee165b/CMakeFiles/CMakeTmp'
+make: *** [cmTryCompileExec2281369951/fast] Error 2
+
+
+Performing C SOURCE FILE Test HAVE_STRUCT_STAT_ST_MTIMENSEC failed with the following output:
+Change Dir: /home/wahyu/bee165b/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec454474565/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec454474565.dir/build.make CMakeFiles/cmTryCompileExec454474565.dir/build
+make[1]: Entering directory `/home/wahyu/bee165b/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/wahyu/bee165b/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec454474565.dir/src.c.o
+/usr/bin/cc   -fno-omit-frame-pointer -fno-stack-protector -fexceptions -funwind-tables -fopenmp -msse2 -DHAVE_STRUCT_STAT_ST_MTIMENSEC -mavx   -o CMakeFiles/cmTryCompileExec454474565.dir/src.c.o   -c /home/wahyu/bee165b/CMakeFiles/CMakeTmp/src.c
+/home/wahyu/bee165b/CMakeFiles/CMakeTmp/src.c: In function ‘main’:
+/home/wahyu/bee165b/CMakeFiles/CMakeTmp/src.c:7:7: error: ‘struct stat’ has no member named ‘st_mtimensec’
+    tmp->st_mtimensec;
+       ^
+make[1]: *** [CMakeFiles/cmTryCompileExec454474565.dir/src.c.o] Error 1
+make[1]: Leaving directory `/home/wahyu/bee165b/CMakeFiles/CMakeTmp'
+make: *** [cmTryCompileExec454474565/fast] Error 2
+
+Source file was:
+
+#include <sys/stat.h>
+
+int main()
+{
+   struct stat* tmp;
+   tmp->st_mtimensec;
+  return 0;
+}
+
+Determining if the function bfd_init exists in the bfd failed with the following output:
+Change Dir: /home/wahyu/bee165b/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec2124576525/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec2124576525.dir/build.make CMakeFiles/cmTryCompileExec2124576525.dir/build
+make[1]: Entering directory `/home/wahyu/bee165b/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/wahyu/bee165b/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec2124576525.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -fno-omit-frame-pointer -fno-stack-protector -fexceptions -funwind-tables -fopenmp -msse2 -DCHECK_FUNCTION_EXISTS=bfd_init -mavx   -o CMakeFiles/cmTryCompileExec2124576525.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-2.8/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec2124576525
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec2124576525.dir/link.txt --verbose=1
+/usr/bin/cc   -fno-omit-frame-pointer -fno-stack-protector -fexceptions -funwind-tables -fopenmp -msse2 -DCHECK_FUNCTION_EXISTS=bfd_init -mavx    CMakeFiles/cmTryCompileExec2124576525.dir/CheckFunctionExists.c.o  -o cmTryCompileExec2124576525 -rdynamic -lbfd 
+/usr/bin/ld: cannot find -lbfd
+collect2: error: ld returned 1 exit status
+make[1]: *** [cmTryCompileExec2124576525] Error 1
+make[1]: Leaving directory `/home/wahyu/bee165b/CMakeFiles/CMakeTmp'
+make: *** [cmTryCompileExec2124576525/fast] Error 2
+
+
+Determining if the function cplus_demangle exists in the iberty failed with the following output:
+Change Dir: /home/wahyu/bee165b/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec1012715967/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec1012715967.dir/build.make CMakeFiles/cmTryCompileExec1012715967.dir/build
+make[1]: Entering directory `/home/wahyu/bee165b/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/wahyu/bee165b/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec1012715967.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -fno-omit-frame-pointer -fno-stack-protector -fexceptions -funwind-tables -fopenmp -msse2 -DCHECK_FUNCTION_EXISTS=cplus_demangle -mavx   -o CMakeFiles/cmTryCompileExec1012715967.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-2.8/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec1012715967
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec1012715967.dir/link.txt --verbose=1
+/usr/bin/cc   -fno-omit-frame-pointer -fno-stack-protector -fexceptions -funwind-tables -fopenmp -msse2 -DCHECK_FUNCTION_EXISTS=cplus_demangle -mavx    CMakeFiles/cmTryCompileExec1012715967.dir/CheckFunctionExists.c.o  -o cmTryCompileExec1012715967 -rdynamic -liberty 
+/usr/bin/ld: cannot find -liberty
+collect2: error: ld returned 1 exit status
+make[1]: *** [cmTryCompileExec1012715967] Error 1
+make[1]: Leaving directory `/home/wahyu/bee165b/CMakeFiles/CMakeTmp'
+make: *** [cmTryCompileExec1012715967/fast] Error 2
+
+
+Determining if the include file bfd.h exists failed with the following output:
+Change Dir: /home/wahyu/bee165b/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec3803363425/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec3803363425.dir/build.make CMakeFiles/cmTryCompileExec3803363425.dir/build
+make[1]: Entering directory `/home/wahyu/bee165b/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/wahyu/bee165b/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec3803363425.dir/CheckIncludeFile.c.o
+/usr/bin/cc  -DPACKAGE=Bee -DPACKAGE_VERSION=1.6.5-150-gdc14e23 -fno-omit-frame-pointer -fno-stack-protector -fexceptions -funwind-tables -fopenmp -msse2 -mavx   -o CMakeFiles/cmTryCompileExec3803363425.dir/CheckIncludeFile.c.o   -c /home/wahyu/bee165b/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+/home/wahyu/bee165b/CMakeFiles/CMakeTmp/CheckIncludeFile.c:1:17: fatal error: bfd.h: No such file or directory
+ #include <bfd.h>
+                 ^
+compilation terminated.
+make[1]: *** [CMakeFiles/cmTryCompileExec3803363425.dir/CheckIncludeFile.c.o] Error 1
+make[1]: Leaving directory `/home/wahyu/bee165b/CMakeFiles/CMakeTmp'
+make: *** [cmTryCompileExec3803363425/fast] Error 2
+
+

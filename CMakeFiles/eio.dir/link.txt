@@ -1,0 +1,2 @@
+/usr/bin/ar cr libeio.a  CMakeFiles/eio.dir/third_party/bee_eio.c.o
+/usr/bin/ranlib libeio.a

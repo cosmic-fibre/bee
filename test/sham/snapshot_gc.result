@@ -1,0 +1,110 @@
+os.execute("rm -f *.snap")
+---
+- 0
+...
+os.execute("rm -f *.xlog")
+---
+- 0
+...
+os.execute("touch mt")
+---
+- 0
+...
+--# stop server default
+--# start server default
+space = db.schema.create_space('test', { engine = 'sham' })
+---
+...
+index = space:create_index('primary')
+---
+...
+for key = 1, 351 do space:insert({key}) end
+---
+...
+db.snapshot()
+---
+- ok
+...
+space:drop()
+---
+...
+sham_schedule()
+---
+...
+sham_dir()[1]
+---
+- 1
+...
+-- ensure that previous space has been garbage collected
+space = db.schema.create_space('test', { engine = 'sham' })
+---
+...
+index = space:create_index('primary')
+---
+...
+for key = 1, 351 do space:insert({key}) end
+---
+...
+sham_dir()[1] -- 2
+---
+- 2
+...
+db.snapshot()
+---
+- ok
+...
+space:drop()
+---
+...
+sham_schedule()
+---
+...
+sham_dir()[1] -- 1
+---
+- 1
+...
+space = db.schema.create_space('test', { engine = 'sham' })
+---
+...
+index = space:create_index('primary')
+---
+...
+for key = 1, 351 do space:insert({key}) end
+---
+...
+sham_dir()[1] -- 2
+---
+- 2
+...
+db.snapshot()
+---
+- ok
+...
+space:drop()
+---
+...
+sham_schedule()
+---
+...
+sham_dir()[1] -- 1
+---
+- 1
+...
+os.execute("rm -f *.snap")
+---
+- 0
+...
+os.execute("rm -f *.xlog")
+---
+- 0
+...
+os.execute("rm -f mt")
+---
+- 0
+...
+os.execute("rm -f lock")
+---
+- 0
+...
+--# stop server default
+--# start server default

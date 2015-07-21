@@ -1,0 +1,2 @@
+/usr/bin/ar cr libmisc.a  CMakeFiles/misc.dir/third_party/crc32.c.o CMakeFiles/misc.dir/third_party/sha1.c.o CMakeFiles/misc.dir/third_party/proctitle.c.o CMakeFiles/misc.dir/third_party/PMurHash.c.o CMakeFiles/misc.dir/third_party/base64.c.o CMakeFiles/misc.dir/third_party/qsort_arg_mt.c.o
+/usr/bin/ranlib libmisc.a

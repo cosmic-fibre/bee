@@ -1,0 +1,13 @@
+-- Options for Bee
+default_cfg = {
+    pid_file   = "/var/run/bee", -- will become pid_file .. instance .. '.pid'
+    wal_dir    = "/var/lib/bee", -- will become wal_dir/instance/
+    snap_dir   = "/var/lib/bee", -- snap_dir/instance/
+    sham_dir = "/var/lib/bee", -- will become sham_dir/sham/instance/
+    logger     = "/var/log/bee", -- logger/instance .. '.log'
+    username   = "bee",
+}
+
+instance_dir = "/etc/bee/instances.enabled"
+
+-- vim: set ft=lua :

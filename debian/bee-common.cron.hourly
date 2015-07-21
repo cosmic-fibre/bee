@@ -1,0 +1,6 @@
+#!/bin/sh
+
+test -x /usr/bin/bee || exit 0
+test -x /usr/sbin/bee_snapshot_rotate || exit 0
+
+exec /usr/sbin/bee_snapshot_rotate

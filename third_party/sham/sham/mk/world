@@ -1,0 +1,33 @@
+
+# sham makefile
+#
+
+buildworld = 1
+
+include mk/sham
+include $(addsuffix /makefile, $(SHAM_DIRS))
+
+OPLATFORM = $(LIBSR_OBJECTS) \
+            $(LIBSV_OBJECTS) \
+            $(LIBSX_OBJECTS) \
+            $(LIBSL_OBJECTS) \
+            $(LIBSD_OBJECTS) \
+            $(LIBSI_OBJECTS) \
+            $(LIBSE_OBJECTS) \
+            $(SHAM_OBJECTS)
+O = $(OPLATFORM)
+
+all: banner $(O)
+
+banner:
+	$(E) "SHAM v$(SHAM_VMAJOR).$(SHAM_VMINOR)"
+	$(E)
+	$(E) "cc: $(CC)"
+	$(E) "cflags: $(CFLAGS_OPT) $(CFLAGS_STRICT)"
+	$(E)
+
+.c.o:
+	$(E) "cc   $<"
+	$(Q) $(CC) $(CFLAGS_SHAM) -c $< -o $@
+
+# vim: syntax=make

@@ -1,0 +1,22 @@
+.. code-block:: console
+
+    $ # Terminal 1
+    $ mkdir -p ~/bee_test_node_1
+    $ cd ~/bee_test_node_1
+    ~/bee_test_node_1$ rm -R ~/bee_test_node_1/*
+    ~/bee_test_node_1$ ~/bee/src/bee
+    ~/bee/src/bee: version 1.6.3-1724-g033ed69
+    type 'help' for interactive help
+    bee> db.cfg{listen=3301}
+    ... ...
+    bee> db.schema.user.create('replicator', {password = 'password'})
+    2014-10-13 11:12:56.052 [25018] wal I> creating `./00000000000000000000.xlog.inprogress'
+    ---
+    ...
+    bee> db.schema.user.grant('replicator','read,write','universe')
+    ---
+    ...
+    bee> db.space._cluster:select({0},{iterator='GE'})
+    ---
+    - - [1, '6190d919-1133-4452-b123-beca0b178b32']
+    ...

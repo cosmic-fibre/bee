@@ -1,0 +1,41 @@
+space = db.schema.space.create('test')
+---
+...
+index = db.space.test:create_index('primary')
+---
+...
+db.space.test:insert{1, 'first tuple'}
+---
+- [1, 'first tuple']
+...
+db.space.test:insert{2, 'second tuple'}
+---
+- [2, 'second tuple']
+...
+db.space.test:insert{3, 'third tuple'}
+---
+- [3, 'third tuple']
+...
+db.space.test:delete{1}
+---
+- [1, 'first tuple']
+...
+db.space.test:delete{2}
+---
+- [2, 'second tuple']
+...
+db.space.test:delete{3}
+---
+- [3, 'third tuple']
+...
+check log line for 'ignoring missing WAL'
+
+'ignoring missing WAL' exists in server log
+
+db.space.test:select{}
+---
+- []
+...
+db.space.test:drop()
+---
+...
