@@ -30,8 +30,6 @@ The build depends on the following external libraries:
 
 Please follow these steps to compile Bee:
 
-    # If compiling from git
-    bee $ git submodule update --init
 
     bee $ cmake .
     bee $ sudo make install
